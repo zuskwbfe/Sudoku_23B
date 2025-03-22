@@ -6,12 +6,14 @@ class SudokuCell : public QPushButton {
 public:
   SudokuCell(int row, int col, QWidget *parent = nullptr);
   void setDisplayValue(int value);
-  int row() const { return _row; }
-  int col() const { return _col; }
+  int GetRow() const { return row; }
+  int GetCol() const { return col; }
 
 signals:
+  // Сигнал клика на ячейку
   void cellClicked(int row, int col);
 
 private:
-  int _row, _col;
+  int row;
+  int col;
 };
