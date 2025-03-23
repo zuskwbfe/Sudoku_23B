@@ -12,6 +12,7 @@ set(${project}_SOURCES
         main.cpp)
 
 add_subdirectory(view)
+add_subdirectory(model)
 
 set(${project}_SOURCE_LIST
         ${${project}_SOURCES})
@@ -24,4 +25,5 @@ add_executable(${project}
         PRIVATE
             Qt6::Widgets
             view
+            model
     )
