@@ -1,5 +1,4 @@
-#ifndef SUDOKUSOLVER_H
-#define SUDOKUSOLVER_H
+#pragma once
 
 #include "SudokuBoard.h"
 
@@ -20,5 +19,3 @@ public:
 private:
     bool solveRecursive(SudokuBoard& board);
 };
-
-#endif // SUDOKUSOLVER_H
