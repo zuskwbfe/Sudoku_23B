@@ -42,5 +42,26 @@ void SudokuGenerator::generate(SudokuBoard& board, int difficutly){
         SudokuBoard tempBoard = board; // Копия доски
         int solutions = 0;
 
-
+        // Проверка: имеет ли текущая доска единственное решение
+        backtrackingSolver tempSolver;
+        tempSolver.solve(tempBoard);
+        if (tempBoard.isSolver()){
+            solutions++;
+        }
+        tempBoard = board;
+        for (int i = 9; i > 0; i--){
+            if (board.isValidMove(row, col, i)){
+                tempBoard.setCellValue(row, col, i);
+                tempSolver.solve(tempBoard);
+                if (tempBoard.isSolver()){
+                    solutions++;
+                }
+            }
+        }
+        if (solutions > 1) {
+            board.setCellValue(row, col, originalValue); // Восстанавливаем число
+        } else {
+            removeCount++;  // Удаление подтверждено
+        }
+    }
 }
