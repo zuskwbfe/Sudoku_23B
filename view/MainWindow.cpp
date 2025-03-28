@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "../model/SudokuBoard.h"
 #include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -26,4 +27,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 // Обновление отображаемого значения в ячейке
 void MainWindow::UpdateCell(int row, int col, int value) {
   cells[row][col]->setDisplayValue(value);
+}
+
+void MainWindow::updateBoard() {
+  for (int i = 0; i < 9; ++i) {
+    for (int j = 0; j < 9; ++j) {
+      cells[i][j]->setDisplayValue(board.getCellValue(i, j));
+    }
+  }
 }

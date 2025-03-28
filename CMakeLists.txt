@@ -1,29 +1,33 @@
 cmake_minimum_required(VERSION 3.23)
-
-set(project "Sudoku_23B")
-project(${project})
+project(Sudoku_23B)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 COMPONENTS Widgets REQUIRED)
 
-set(${project}_SOURCES
-        main.cpp)
+# Добавляем исходные файлы модели
+add_library(model STATIC
+    model/SudokuBoard.cpp
+    model/SudokuSolver.cpp
+)
+target_include_directories(model PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/model
+)
 
-add_subdirectory(view)
-add_subdirectory(model)
+# Добавляем исходные файлы представления
+add_library(view STATIC
+    view/MainWindow.cpp
+    view/SudokuCell.cpp
+    model/SudokuBoard.cpp
+    model/SudokuSolver.cpp
+)
+target_include_directories(view PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/view
+    ${CMAKE_CURRENT_SOURCE_DIR}/model
+)
+target_link_libraries(view PRIVATE model Qt6::Widgets)
 
-set(${project}_SOURCE_LIST
-        ${${project}_SOURCES})
-
-
-add_executable(${project}
-        ${${project}_SOURCE_LIST})
-
-        target_link_libraries(Sudoku_23B
-        PRIVATE
-            Qt6::Widgets
-            view
-            model
-    )
+# Главное приложение
+add_executable(${PROJECT_NAME} main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE view model Qt6::Widgets)
