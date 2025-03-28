@@ -21,3 +21,4 @@ add_library(${project}
 
 
 # target_link_libraries(controller PRIVATE Qt6::Widgets) ???
+target_link_libraries(${project} model view)
