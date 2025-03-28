@@ -19,6 +19,7 @@ void SudokuGenerator::generate(SudokuBoard& board, int difficutly){
         for (int j = 0; j < 9; j++){
         cell.push_back({i, j}); // Добавляем все 81 клетку
     }}
+    std::shuffle(cells.begin(), cells.end(), g); // Случайный порядок клеток
 
     int numRemove = 0;
     if (difficutly == 0){
