@@ -1,23 +1,15 @@
-cmake_minimum_required(VERSION 3.23)
+# Библиотека представления
+add_library(view_lib STATIC
+    MainWindow.cpp
+    SudokuCell.cpp
+)
 
-set(project "view")
-project(${project})
+target_include_directories(view_lib PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/model  # для доступа к классам модели
+)
 
-set(CMAKE_CXX_STANDARD 17)
-
-set(${project}_SOURCES
-        MainWindow.cpp SudokuCell.cpp)
-
-set(${project}_HEADERS
-        MainWindow.h SudokuCell.h)
-
-set(${project}_SOURCE_LIST
-        ${${project}_SOURCES}
-        ${${project}_HEADERS})
-
-add_library(${project}
-        STATIC
-        ${${project}_SOURCE_LIST})
-
-
-target_link_libraries(view PRIVATE Qt6::Widgets)
+target_link_libraries(view_lib PRIVATE
+    Qt6::Widgets
+    model_lib  # зависимость от модели
+)
