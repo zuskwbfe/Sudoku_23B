@@ -1,68 +1,88 @@
 #include "SudokuGenerator.h"
-#include <random>
+#include "SudokuSolver.h"
 #include <algorithm>
+#include <random>
+#include <stdexcept>
 #include <vector>
 
-SudokuGenerator::SudokuGenerator(SudokuSolver* solver): solver_(solver){}
+SudokuGenerator::SudokuGenerator(SudokuSolver *solver) : solver_(solver) {}
 
-// Очищает переданную доску (заполняет её нулями или пустыми значениями).
-void SudokuGenerator::generate(SudokuBoard& board, int difficutly){
-    board.clear();
+void SudokuGenerator::generate(SudokuBoard &board, int difficulty) {
+  board.clear();
 
-    // Создайние полностью решенной доски
-    solver_-> solver(board);
-    // Удаление номеров в зависимости от сложности
-    std::random_device rd;
-    std::mt19937 g(rd()); // Генератор случайных чисел
-    std::vector<std::pair<int, int>> cells; // Вектор для хранения координат клеток
-    for (int i = 0; i < 9; ++i){
-        for (int j = 0; j < 9; j++){
-        cell.push_back({i, j}); // Добавляем все 81 клетку
-    }}
-    std::shuffle(cells.begin(), cells.end(), g); // Случайный порядок клеток
+  // создаем решенную доску
+  if (!solver_->solve(board)) {
+    throw std::runtime_error("Failed to generate solved board");
+  }
 
-    int numRemove = 0;
-    if (difficutly == 0){
-        numRemove = 40;
-    } else if (difficutly == 1){
-        numRemove = 50;
+  // подготовка клеток для удаления
+  std::vector<std::pair<int, int>> cells;
+  for (int i = 0; i < 9; ++i) {
+    for (int j = 0; j < 9; ++j) {
+      cells.emplace_back(i, j);
+    }
+  }
+
+  std::random_device rd; // создаем генератор случайных чисел
+  // перемешиваем вектор клеток для случайного порядка удаления чисел
+  std::shuffle(cells.begin(), cells.end(), std::mt19937(rd()));
+
+  // количество удаляемых чисел
+  int numToRemove = 40 + difficulty * 10; // 40, 50 или 60
+
+  // удаление чисел
+  int removed = 0;
+  for (const auto &[row, col] : cells) {
+    if (removed >= numToRemove)
+      break;
+
+    int savedValue = board.getCellValue(row, col);
+    if (savedValue == 0)
+      continue;
+
+    board.setCellValue(row, col, 0);
+
+    // упрощенная проверка уникальности
+    SudokuBoard tempBoard = board;
+    int solutions = 0;
+    countSolutions(tempBoard, solutions, 0);
+
+    if (solutions == 1) {
+      removed++;
     } else {
-        numRemove = 60;
+      board.setCellValue(row, col, savedValue);
     }
+  }
+}
 
-    int removeCount = 0;
-    for (const auto& cell : cells) {
-        if (removeCount >= numRemove){
-            break; // Достаточно удалили
-        }
-        int row = cell.first;
-        int col = cell.second;
-        int originalValue = board.geteCellValue(row, col);
-        board.setCellValue(row, col, 0); // Удаляем число (записываем 0)
+void SudokuGenerator::countSolutions(SudokuBoard &board, int &solutionCount,
+                                     int depth) {
+  if (solutionCount > 1)
+    return; // прекращаем если нашли более 1 решения
 
-        SudokuBoard tempBoard = board; // Копия доски
-        int solutions = 0;
-
-        // Проверка: имеет ли текущая доска единственное решение
-        backtrackingSolver tempSolver;
-        tempSolver.solve(tempBoard);
-        if (tempBoard.isSolver()){
-            solutions++;
-        }
-        tempBoard = board;
-        for (int i = 9; i > 0; i--){
-            if (board.isValidMove(row, col, i)){
-                tempBoard.setCellValue(row, col, i);
-                tempSolver.solve(tempBoard);
-                if (tempBoard.isSolver()){
-                    solutions++;
-                }
-            }
-        }
-        if (solutions > 1) {
-            board.setCellValue(row, col, originalValue); // Восстанавливаем число
-        } else {
-            removeCount++;  // Удаление подтверждено
-        }
+  // находим первую пустую клетку
+  int row = -1, col = -1;
+  for (int i = 0; i < 9 && row == -1; ++i) {
+    for (int j = 0; j < 9 && col == -1; ++j) {
+      if (board.getCellValue(i, j) == 0) {
+        row = i;
+        col = j;
+      }
     }
+  }
+
+  // если нет пустых клеток - решение найдено
+  if (row == -1) {
+    solutionCount++;
+    return;
+  }
+
+  // перебираем возможные числа
+  for (int num = 1; num <= 9 && solutionCount <= 1; ++num) {
+    if (board.isValidMove(row, col, num)) {
+      board.setCellValue(row, col, num);
+      countSolutions(board, solutionCount, depth + 1);
+      board.setCellValue(row, col, 0);
+    }
+  }
 }
