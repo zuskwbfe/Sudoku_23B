@@ -29,6 +29,10 @@ void MainWindow::UpdateCell(int row, int col, int value) {
   cells[row][col]->setDisplayValue(value);
 }
 
+void MainWindow::setBoard(const SudokuBoard& newBoard) {
+  board = newBoard;
+}
+
 void MainWindow::updateBoard() {
   for (int i = 0; i < 9; ++i) {
     for (int j = 0; j < 9; ++j) {

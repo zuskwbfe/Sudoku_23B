@@ -9,11 +9,12 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 public:
   explicit MainWindow(QWidget *parent = nullptr);
-  // Обновить значение и отображение ячейки
+  // обновить значение и отображение ячейки
   void UpdateCell(int row, int col, int value);
 
-  SudokuBoard &getBoard() { return board; } // Получение доступа к модели доски
-  void updateBoard(); // Обновление отображения всей доски
+  SudokuBoard &getBoard() { return board; } // получение доступа к модели доски
+  void updateBoard(); // обновление отображения всей доски
+  void setBoard(const SudokuBoard &newBoard); // устанавливает новое игровое поле (доску)
 
 private:
   // Сетка для размещения ячеек
