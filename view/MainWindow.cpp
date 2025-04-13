@@ -1,16 +1,28 @@
 #include "MainWindow.h"
 #include "../model/SudokuBoard.h"
 #include <QInputDialog>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // Создаем центральный виджет для размещения элементов
   QWidget *centralWidget = new QWidget(this);
+  QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);  // Основной вертикальный layout
+
+  // Создаём панель для таймера и ошибок
+  QHBoxLayout *infoLayout = new QHBoxLayout();
+  timerLabel = new QLabel("Время: 00:00", this);
+  errorLabel = new QLabel("Ошибки: 0", this);
+
+  infoLayout->addWidget(timerLabel);
+  infoLayout->addWidget(errorLabel);
+  mainLayout->addLayout(infoLayout);
 
   // Инициализируем сетку 9x9 для расположения ячеек
-  gridLayout = new QGridLayout(centralWidget);
+  gridLayout = new QGridLayout();
+  mainLayout->addLayout(gridLayout);
 
-  // Убрираем промежутки между ячейками
-  gridLayout->setSpacing(0);
+  // // Убрираем промежутки между ячейками
+  // gridLayout->setSpacing(0);
 
   // Заполняем сетку ячейками SudokuCell
   for (int i = 0; i < 9; ++i) {
@@ -66,4 +78,22 @@ void MainWindow::updateBoard() {
       cells[i][j]->setDisplayValue(board.getCellValue(i, j));
     }
   }
+}
+
+void MainWindow::updateTimerDisplay(int seconds) {
+  int minutes = seconds / 60;
+  int secs = seconds % 60;
+  timerLabel->setText(QString("Время: %1:%2")
+                     .arg(minutes, 2, 10, QLatin1Char('0'))
+                     .arg(secs, 2, 10, QLatin1Char('0')));
+}
+
+void MainWindow::updateErrorDisplay(int errors) {
+  errorLabel->setText(QString("Ошибки: %1").arg(errors));
+  errorLabel->setStyleSheet("color: red;");
+}
+
+void MainWindow::updateGameStats(const QString &time, int errors) {
+  timerLabel->setText("Время: " + time);
+  errorLabel->setText(QString("Ошибки: %1").arg(errors));
 }

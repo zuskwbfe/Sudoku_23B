@@ -20,6 +20,7 @@ public:
   void startTimer();
   void stopTimer();
   int getErrorCount() const { return errorCount_; }
+  QString formatTime(int seconds) const;
 
 private slots:
   // обработчик клика по клетке

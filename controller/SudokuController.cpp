@@ -19,6 +19,14 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   newGame(0);
 }
 
+QString SudokuController::formatTime(int seconds) const {
+  int minutes = seconds / 60;
+  int secs = seconds % 60;
+  return QString("%1:%2")
+      .arg(minutes, 2, 10, QLatin1Char('0'))
+      .arg(secs, 2, 10, QLatin1Char('0'));
+}
+
 void SudokuController::newGame(int difficulty) {
   // генерация новой доски с заданной сложностью
   generator_.generate(*board_, difficulty);
@@ -30,8 +38,7 @@ void SudokuController::newGame(int difficulty) {
   startTimer();
 
   // передаём ошибки и время в MainWindow
-  view_->updateTimerDisplay(secondsElapsed_);
-  view_->updateErrorDisplay(errorCount_);
+  view_->updateGameStats(formatTime(secondsElapsed_), errorCount_);
 
   // обновление всех ячеек на представлении
   for (int row = 0; row < 9; ++row) {
@@ -102,6 +109,8 @@ void SudokuController::onNumberEntered(int row, int col, int value) {
     // проверка решения
     checkSolved();
   } else {
+    errorCount_++; // Увеличиваем счётчик ошибок
+    view_->updateErrorDisplay(errorCount_); // Обновляем отображение
     // показ сообщения о недопустимом ходе
     QMessageBox::warning(view_, tr("Недопустимый ход"),
                          tr("Этот ход не разрешен правилами судоку."));

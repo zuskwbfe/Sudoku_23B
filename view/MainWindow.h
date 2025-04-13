@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QMainWindow>
 #include <QPushButton>
+#include <QLabel>  // Для отображения таймера и ошибок
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -11,6 +12,10 @@ public:
   explicit MainWindow(QWidget *parent = nullptr);
   // обновить значение и отображение ячейки
   void UpdateCell(int row, int col, int value);
+
+  void updateTimerDisplay(int seconds);
+  void updateErrorDisplay(int errors);
+  void updateGameStats(const QString &time, int errors);  // Комбинированный метод
 
   SudokuBoard &getBoard() { return board; } // получение доступа к модели доски
   void updateBoard(); // обновление отображения всей доски
@@ -21,6 +26,8 @@ private:
   QGridLayout *gridLayout;
   SudokuCell *cells[9][9];
   SudokuBoard board;
+  QLabel *timerLabel;  // Метка для таймера
+  QLabel *errorLabel;  // Метка для ошибок
 
 signals:
   // Сигнал при клике на ячейку
