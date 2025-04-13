@@ -11,6 +11,11 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   // соединение сигнала клика по ячейке со слотом обработки
   connect(view_, &MainWindow::CellClicked, this,
           &SudokuController::onCellClicked);
+
+  // Инициализация таймера
+  timer_ = new QTimer(this);
+  connect(timer_, &QTimer::timeout, this, &SudokuController::updateTimer);
+
   newGame(0);
 }
 
@@ -18,6 +23,15 @@ void SudokuController::newGame(int difficulty) {
   // генерация новой доски с заданной сложностью
   generator_.generate(*board_, difficulty);
   gameStarted_ = true;
+  secondsElapsed_ = 0;
+  errorCount_ = 0;
+
+  // запускаем таймер
+  startTimer();
+
+  // передаём ошибки и время в MainWindow
+  view_->updateTimerDisplay(secondsElapsed_);
+  view_->updateErrorDisplay(errorCount_);
 
   // обновление всех ячеек на представлении
   for (int row = 0; row < 9; ++row) {
@@ -29,6 +43,23 @@ void SudokuController::newGame(int difficulty) {
   // сброс выбранной ячейки
   selectedRow_ = -1;
   selectedCol_ = -1;
+}
+
+void SudokuController::startTimer() {
+  if (timer_) {
+    timer_->start(1000); // Обновление каждую секунду
+  }
+}
+
+void SudokuController::stopTimer() {
+  if (timer_) {
+    timer_->stop();
+  }
+}
+
+void SudokuController::updateTimer() {
+  secondsElapsed_++;
+  view_->updateTimerDisplay(secondsElapsed_); // Обновляем UI
 }
 
 // слот обработки клика по ячейке

@@ -4,6 +4,7 @@
 #include "SudokuGenerator.h"
 #include "SudokuSolver.h"
 #include <QMessageBox> // для отображения всплывающих сообщений пользователю
+#include <QTimer>  // Добавляем для таймера
 
 // контроллер для управления игровой логикой судоку
 class SudokuController : public QObject {
@@ -15,6 +16,11 @@ public:
   // начать новую игру с указанной сложностью
   void newGame(int difficulty);
 
+  // Методы для таймера и ошибок
+  void startTimer();
+  void stopTimer();
+  int getErrorCount() const { return errorCount_; }
+
 private slots:
   // обработчик клика по клетке
   void onCellClicked(int row, int col);
@@ -24,6 +30,8 @@ private slots:
   bool checkInput(int row, int col, int value);
   // проверка завершения игры
   void checkSolved();
+  // обновления таймера
+  void updateTimer();
 
 private:
   SudokuBoard *board_;
@@ -33,4 +41,9 @@ private:
   int selectedRow_;
   int selectedCol_;
   bool gameStarted_;
+
+  // Добавляем таймер и счётчики
+  QTimer *timer_;
+  int secondsElapsed_; // таймер
+  int errorCount_; // счетчик ошибок
 };
