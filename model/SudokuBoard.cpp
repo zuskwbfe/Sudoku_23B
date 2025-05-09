@@ -60,13 +60,6 @@ bool SudokuBoard::isSolved() const {
   return true; // Все клетки заполнены корректно
 }
 
-// Очистка доски (заполнение нулями)
-void SudokuBoard::clear() {
-  for (auto &row : board_) {
-    std::fill(row.begin(), row.end(), 0);
-  }
-}
-
 // Реализация Iterator
 int SudokuBoard::Iterator::operator*() const {
   return board_->getCellValue(row_, col_);
@@ -85,4 +78,25 @@ SudokuBoard::Iterator &SudokuBoard::Iterator::operator++() {
 // Проверка на неравенство итераторов
 bool SudokuBoard::Iterator::operator!=(const Iterator &other) const {
   return row_ != other.row_ || col_ != other.col_;
+}
+
+bool SudokuBoard::isCellOriginal(int row, int col) const {
+  return originalCells_[row][col];
+}
+
+void SudokuBoard::setCellOriginal(int row, int col, bool original) {
+  originalCells_[row][col] = original;
+}
+
+void SudokuBoard::clearOriginals() {
+  for (auto &row : originalCells_) {
+    row.fill(false);
+  }
+}
+
+void SudokuBoard::clear() {
+  for (auto &row : board_) {
+    std::fill(row.begin(), row.end(), 0);
+  }
+  clearOriginals();
 }

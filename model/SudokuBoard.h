@@ -15,6 +15,10 @@ public:
   bool isSolved() const;
   void clear();
 
+  bool isCellOriginal(int row, int col) const;
+  void setCellOriginal(int row, int col, bool original);
+  void clearOriginals();
+
   // Iterator (паттерн Итератор)
   class Iterator {
   public:
@@ -40,4 +44,5 @@ public:
 private:
   // Внутреннее представление доски - двумерный массив 9x9
   std::array<std::array<int, 9>, 9> board_;
+  std::array<std::array<bool, 9>, 9> originalCells_ = {}; // Новое поле
 };
