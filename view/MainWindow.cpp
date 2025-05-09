@@ -6,7 +6,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // Создаем центральный виджет для размещения элементов
   QWidget *centralWidget = new QWidget(this);
-  QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);  // Основной вертикальный layout
+  QVBoxLayout *mainLayout =
+      new QVBoxLayout(centralWidget); // Основной вертикальный layout
 
   // Создаём панель для таймера и ошибок
   QHBoxLayout *infoLayout = new QHBoxLayout();
@@ -20,9 +21,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // Инициализируем сетку 9x9 для расположения ячеек
   gridLayout = new QGridLayout();
   mainLayout->addLayout(gridLayout);
-
-  // // Убрираем промежутки между ячейками
-  // gridLayout->setSpacing(0);
 
   // Заполняем сетку ячейками SudokuCell
   for (int i = 0; i < 9; ++i) {
@@ -70,7 +68,21 @@ void MainWindow::UpdateCell(int row, int col, int value) {
   cells[row][col]->setDisplayValue(value);
 }
 
-void MainWindow::setBoard(const SudokuBoard &newBoard) { board = newBoard; }
+SudokuCell *MainWindow::getCell(int row, int col) {
+  if (row < 0 || row >= 9 || col < 0 || col >= 9)
+    return nullptr;
+  return cells[row][col];
+}
+
+void MainWindow::setBoard(const SudokuBoard &newBoard) {
+  board = newBoard;
+  for (int row = 0; row < 9; ++row) {
+    for (int col = 0; col < 9; ++col) {
+      cells[row][col]->setOriginal(board.isCellOriginal(row, col));
+      cells[row][col]->setDisplayValue(board.getCellValue(row, col));
+    }
+  }
+}
 
 void MainWindow::updateBoard() {
   for (int i = 0; i < 9; ++i) {
@@ -84,8 +96,8 @@ void MainWindow::updateTimerDisplay(int seconds) {
   int minutes = seconds / 60;
   int secs = seconds % 60;
   timerLabel->setText(QString("Время: %1:%2")
-                     .arg(minutes, 2, 10, QLatin1Char('0'))
-                     .arg(secs, 2, 10, QLatin1Char('0')));
+                          .arg(minutes, 2, 10, QLatin1Char('0'))
+                          .arg(secs, 2, 10, QLatin1Char('0')));
 }
 
 void MainWindow::updateErrorDisplay(int errors) {
