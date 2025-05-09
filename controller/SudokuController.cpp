@@ -19,6 +19,7 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   newGame(0);
 }
 
+// Форматирует время в формат "мм:сс" для отображения на UI.
 QString SudokuController::formatTime(int seconds) const {
   int minutes = seconds / 60;
   int secs = seconds % 60;
@@ -27,9 +28,14 @@ QString SudokuController::formatTime(int seconds) const {
       .arg(secs, 2, 10, QLatin1Char('0'));
 }
 
+// Начинает новую игру, генерирует доску судоку с заданной сложностью.
 void SudokuController::newGame(int difficulty) {
-  // генерация новой доски с заданной сложностью
+  board_->clear(); // Очищаем доску
+  board_->clearOriginals(); // Сбрасываем метки исходных чисел
   generator_.generate(*board_, difficulty);
+  view_->setBoard(*board_);
+
+  // Инициализация параметров игры
   gameStarted_ = true;
   secondsElapsed_ = 0;
   errorCount_ = 0;
@@ -97,27 +103,33 @@ void SudokuController::onCellClicked(int row, int col) {
 
 // обработка введенного числа
 void SudokuController::onNumberEntered(int row, int col, int value) {
-  if (!gameStarted_)
-    return; // если игра не начата - игнорируем
-
-  // проверка допустимости хода
-  if (checkInput(row, col, value)) {
-    // установка значения в модель
-    board_->setCellValue(row, col, value);
-    // обновление отображения
-    view_->UpdateCell(row, col, value);
-    // проверка решения
-    checkSolved();
-  } else {
-    errorCount_++; // Увеличиваем счётчик ошибок
-    view_->updateErrorDisplay(errorCount_); // Обновляем отображение
-    // показ сообщения о недопустимом ходе
-    QMessageBox::warning(view_, tr("Недопустимый ход"),
-                         tr("Этот ход не разрешен правилами судоку."));
+  if (board_->isCellOriginal(row, col)) {
+    QMessageBox::warning(view_, "Ошибка", "Нельзя изменять исходные цифры!");
+    view_->UpdateCell(row, col, board_->getCellValue(row, col));
+    return;
   }
-}
 
-// проверка допустимости введенного числа
+  // Добавляем проверку
+  if (value != 0 && !board_->isValidMove(row, col, value)) {
+    QMessageBox::warning(view_, "Ошибка", "Недопустимое значение!");
+    errorCount_++;
+    view_->updateErrorDisplay(errorCount_);
+    view_->UpdateCell(row, col, board_->getCellValue(row, col));
+    return;
+  }
+
+  // Если всё ок — обновляем доску
+  board_->setCellValue(row, col, value);
+  board_->setCellOriginal(row, col, false);
+
+  SudokuCell *cell = view_->getCell(row, col);
+  if (cell) {
+    cell->setOriginal(false);
+    cell->setDisplayValue(value);
+  }
+
+  checkSolved();
+} // проверка допустимости введенного числа
 bool SudokuController::checkInput(int row, int col, int value) {
   return board_->isValidMove(row, col, value);
 }

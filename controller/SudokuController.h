@@ -4,7 +4,7 @@
 #include "SudokuGenerator.h"
 #include "SudokuSolver.h"
 #include <QMessageBox> // для отображения всплывающих сообщений пользователю
-#include <QTimer>  // Добавляем для таймера
+#include <QTimer>      // Добавляем для таймера
 
 // контроллер для управления игровой логикой судоку
 class SudokuController : public QObject {
@@ -46,5 +46,5 @@ private:
   // Добавляем таймер и счётчики
   QTimer *timer_;
   int secondsElapsed_; // таймер
-  int errorCount_; // счетчик ошибок
+  int errorCount_;     // счетчик ошибок
 };
