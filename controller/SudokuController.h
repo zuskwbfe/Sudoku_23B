@@ -1,5 +1,6 @@
 #pragma once
 #include "MainWindow.h"
+#include "StartWindow.h"
 #include "SudokuBoard.h"
 #include "SudokuGenerator.h"
 #include "SudokuSolver.h"

@@ -12,9 +12,11 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   connect(view_, &MainWindow::CellClicked, this,
           &SudokuController::onCellClicked);
 
+
   // Инициализация таймера
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, &SudokuController::updateTimer);
+
 
   newGame(0);
 }

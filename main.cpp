@@ -3,37 +3,29 @@
 #include "model/SudokuGenerator.h"
 #include "model/SudokuSolver.h"
 #include "view/MainWindow.h"
+#include "view/StartWindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]) {
-  QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
-  // инициализация частей
-  SudokuBoard board;
-  BacktrackingSolver solver;
-  SudokuGenerator generator(&solver);
-  MainWindow window;
+    // Создаём модель, представление и контроллер
+    SudokuBoard board;
+    MainWindow *mainWindow = new MainWindow();
+    SudokuController *controller = new SudokuController(&board, mainWindow);
 
-  // генерация игрового поля
-  generator.generate(board, 1); // средняя сложность (50 пустых клеток)
+    // Создаём стартовое окно
+    StartWindow *startWindow = new StartWindow();
+    startWindow->show();
 
-  // проверка что генерация работает правильно
-  int emptyCells = 0;
-  for (int r = 0; r < 9; r++) {
-    for (int c = 0; c < 9; c++) {
-      if (board.getCellValue(r, c) == 0)
-        emptyCells++;
-    }
-  }
-  qDebug() << "Empty cells generated:" << emptyCells;
+    // Когда нажата "Новая игра"
+    QObject::connect(startWindow, &StartWindow::startGame, [&]() {
+        controller->newGame(1); // средняя сложность
+        mainWindow->setWindowTitle("Судоку");
+        mainWindow->resize(450, 450);
+        mainWindow->show();
+        startWindow->close();
+    });
 
-  // настройка контроллера
-  SudokuController controller(&board, &window);
-
-  // настройка окна
-  window.setWindowTitle("Судоку");
-  window.resize(450, 450);
-  window.show();
-
-  return app.exec();
+    return app.exec();
 }

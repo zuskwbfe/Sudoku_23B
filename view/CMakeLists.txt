@@ -2,6 +2,7 @@
 add_library(view_lib STATIC
     MainWindow.cpp
     SudokuCell.cpp
+    StartWindow.cpp
 )
 
 target_include_directories(view_lib PUBLIC
