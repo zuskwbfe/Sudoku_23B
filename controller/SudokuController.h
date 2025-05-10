@@ -22,6 +22,7 @@ public:
   void stopTimer();
   int getErrorCount() const { return errorCount_; }
   QString formatTime(int seconds) const;
+  void onGameSelected(int difficulty);
 
 private slots:
   // обработчик клика по клетке

@@ -13,3 +13,11 @@ StartWindow::StartWindow(QWidget *parent) : QWidget(parent) {
 
     connect(startButton, &QPushButton::clicked, this, &StartWindow::startGame);
 }
+
+void StartWindow::startGame() {
+    // Открываем диалог выбора сложности
+    DifficultyDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        emit gameSelected(dialog.selectedDifficulty());  // Отправляем выбранный уровень сложности
+    }
+}

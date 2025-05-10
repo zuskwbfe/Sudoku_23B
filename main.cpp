@@ -4,6 +4,7 @@
 #include "model/SudokuSolver.h"
 #include "view/MainWindow.h"
 #include "view/StartWindow.h"
+#include "view/DifficultyDialog.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]) {
@@ -18,14 +19,10 @@ int main(int argc, char *argv[]) {
     StartWindow *startWindow = new StartWindow();
     startWindow->show();
 
-    // Когда нажата "Новая игра"
-    QObject::connect(startWindow, &StartWindow::startGame, [&]() {
-        controller->newGame(1); // средняя сложность
-        mainWindow->setWindowTitle("Судоку");
-        mainWindow->resize(450, 450);
-        mainWindow->show();
-        startWindow->close();
-    });
+    // Подключаем сигнал выбора сложности
+QObject::connect(startWindow, &StartWindow::gameSelected,
+                 controller, &SudokuController::newGame);
 
+    startWindow->show();
     return app.exec();
 }

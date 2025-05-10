@@ -58,6 +58,8 @@ void SudokuController::newGame(int difficulty) {
   // сброс выбранной ячейки
   selectedRow_ = -1;
   selectedCol_ = -1;
+
+  view_->show();
 }
 
 void SudokuController::startTimer() {
@@ -143,4 +145,8 @@ void SudokuController::checkSolved() {
                              tr("Вы решили судоку!"));
     gameStarted_ = false; // игра завершена
   }
+}
+
+void SudokuController::onGameSelected(int difficulty) {
+    newGame(difficulty);  // Начинаем новую игру с выбранной сложностью
 }
