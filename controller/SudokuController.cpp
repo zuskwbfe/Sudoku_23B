@@ -150,7 +150,6 @@ void SudokuController::checkSolved() {
   }
 }
 
-
 void SudokuController::onGameSelected(int difficulty) {
     newGame(difficulty);  // Начинаем новую игру с выбранной сложностью
 }
