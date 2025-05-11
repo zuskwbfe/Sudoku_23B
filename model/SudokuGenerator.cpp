@@ -5,26 +5,26 @@
 #include <stdexcept>
 #include <vector>
 
-SudokuGenerator::SudokuGenerator(SudokuSolver *solver)
-    : solver_(solver), gen_(std::random_device{}()) {}
 
-void SudokuGenerator::generate(SudokuBoard &board, int difficulty) {
+SudokuGenerator::SudokuGenerator(SudokuSolver* solver)
+  : solver_(solver), gen_(std::random_device{}()) {}
+
+void SudokuGenerator::generate(SudokuBoard& board, int difficulty) {
   board.clear();
   board.clearOriginals();
 
-  // Генерация случайной решенной доски
+  // Шаг 1: создаем случайно решенную доску
   if (!solver_->randomizedSolve(board, gen_)) {
     throw std::runtime_error("Failed to generate solved board");
   }
 
-  // Настройка сложности
-  int numToRemove = 40 + difficulty * 5; // Более плавная градация
-  removeCells(board, numToRemove);
+  // Шаг 2: удаляем ячейки, сохраняя уникальное решение
+  const int maxRemove = std::min(55, 35 + difficulty * 5);
+  removeCells(board, maxRemove);
 
-  // 3. Помечаем ВСЕ оставшиеся цифры как оригинальные
+  // Шаг 3: помечаем оставшиеся как оригинальные
   for (int row = 0; row < 9; ++row) {
     for (int col = 0; col < 9; ++col) {
-      // Если клетка не пустая - она оригинальная
       if (board.getCellValue(row, col) != 0) {
         board.setCellOriginal(row, col, true);
       }
@@ -32,88 +32,79 @@ void SudokuGenerator::generate(SudokuBoard &board, int difficulty) {
   }
 }
 
-void SudokuGenerator::removeCells(SudokuBoard &board, int numToRemove) {
+void SudokuGenerator::removeCells(SudokuBoard& board, int maxRemove) {
   std::vector<std::pair<int, int>> cells;
-  for (int i = 0; i < 9; ++i) {
-    for (int j = 0; j < 9; ++j) {
-      cells.emplace_back(i, j);
+
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      cells.emplace_back(r, c);
     }
   }
 
   std::shuffle(cells.begin(), cells.end(), gen_);
   int removed = 0;
 
-  for (const auto &[row, col] : cells) {
-    if (removed >= numToRemove)
-      break;
+  for (const auto& [row, col] : cells) {
+    if (removed >= maxRemove) break;
 
-    int saved = board.getCellValue(row, col);
-    if (saved == 0)
-      continue;
+    int original = board.getCellValue(row, col);
+    if (original == 0) continue;
 
     board.setCellValue(row, col, 0);
 
-    if (!hasUniqueSolution(board)) {
-      board.setCellValue(row, col, saved);
+    if (hasUniqueSolution(board)) {
+      ++removed;
     } else {
-      removed++;
+      board.setCellValue(row, col, original);
     }
   }
 }
 
-bool SudokuGenerator::hasUniqueSolution(SudokuBoard &board) {
+bool SudokuGenerator::hasUniqueSolution(SudokuBoard& board) {
   int count = 0;
   countSolutions(board, count);
   return count == 1;
 }
 
-void SudokuGenerator::countSolutions(SudokuBoard &board, int &solutionCount,
-                                     int depth) {
-  if (solutionCount >= 2)
-    return;
+void SudokuGenerator::countSolutions(SudokuBoard& board, int& count) {
+  if (count >= 2) return;
 
-  // Оптимизация: находим клетку с наименьшим количеством вариантов
   int bestRow = -1, bestCol = -1;
-  std::vector<int> bestNumbers;
+  std::vector<int> bestOptions;
 
-  // Поиск оптимальной клетки для ветвления
-  for (int row = 0; row < 9; ++row) {
-    for (int col = 0; col < 9; ++col) {
-      if (board.getCellValue(row, col) != 0)
-        continue;
+  // Найти ячейку с наименьшим числом возможных значений
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      if (board.getCellValue(r, c) != 0) continue;
 
-      std::vector<int> possible;
-      for (int num = 1; num <= 9; ++num) {
-        if (board.isValidMove(row, col, num)) {
-          possible.push_back(num);
+      std::vector<int> options;
+      for (int n = 1; n <= 9; ++n) {
+        if (board.isValidMove(r, c, n)) {
+          options.push_back(n);
         }
       }
 
-      if (possible.empty())
-        return;
+      if (options.empty()) return; // тупик
 
-      if (bestRow == -1 || possible.size() < bestNumbers.size()) {
-        bestRow = row;
-        bestCol = col;
-        bestNumbers = possible;
+      if (bestOptions.empty() || options.size() < bestOptions.size()) {
+        bestRow = r;
+        bestCol = c;
+        bestOptions = std::move(options);
       }
     }
   }
 
   if (bestRow == -1) {
-    solutionCount++;
+    ++count; // Решение найдено
     return;
   }
 
-  // Перебор чисел в случайном порядке
-  std::shuffle(bestNumbers.begin(), bestNumbers.end(), gen_);
+  std::shuffle(bestOptions.begin(), bestOptions.end(), gen_);
 
-  for (int num : bestNumbers) {
+  for (int num : bestOptions) {
     board.setCellValue(bestRow, bestCol, num);
-    countSolutions(board, solutionCount, depth + 1);
+    countSolutions(board, count);
     board.setCellValue(bestRow, bestCol, 0);
-
-    if (solutionCount >= 2)
-      break;
+    if (count >= 2) return;
   }
 }

@@ -36,6 +36,9 @@ private slots:
   // обновления таймера
   void updateTimer();
 
+signals:
+  void gameFinished();
+
 private:
   SudokuBoard *board_;
   MainWindow *view_;

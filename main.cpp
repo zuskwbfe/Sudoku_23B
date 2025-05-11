@@ -20,9 +20,14 @@ int main(int argc, char *argv[]) {
     startWindow->show();
 
     // Подключаем сигнал выбора сложности
-QObject::connect(startWindow, &StartWindow::gameSelected,
+    QObject::connect(startWindow, &StartWindow::gameSelected,
                  controller, &SudokuController::newGame);
 
     startWindow->show();
+
+    QObject::connect(controller, &SudokuController::gameFinished, [=]() {
+    mainWindow->hide();     // скрыть главное окно
+    startWindow->show();    // снова показать стартовое окно
+    });
     return app.exec();
 }

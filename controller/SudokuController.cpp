@@ -144,8 +144,12 @@ void SudokuController::checkSolved() {
     QMessageBox::information(view_, tr("Поздравляем!"),
                              tr("Вы решили судоку!"));
     gameStarted_ = false; // игра завершена
+    stopTimer();          // остановить таймер
+
+    emit gameFinished();  // испускаем сигнал
   }
 }
+
 
 void SudokuController::onGameSelected(int difficulty) {
     newGame(difficulty);  // Начинаем новую игру с выбранной сложностью
