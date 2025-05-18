@@ -12,11 +12,9 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   connect(view_, &MainWindow::CellClicked, this,
           &SudokuController::onCellClicked);
 
-
   // Инициализация таймера
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, &SudokuController::updateTimer);
-
 
   newGame(0);
 }
@@ -29,6 +27,8 @@ QString SudokuController::formatTime(int seconds) const {
       .arg(minutes, 2, 10, QLatin1Char('0'))
       .arg(secs, 2, 10, QLatin1Char('0'));
 }
+
+void MainWindow::setController(SudokuController *ctrl) { controller = ctrl; }
 
 // Начинает новую игру, генерирует доску судоку с заданной сложностью.
 void SudokuController::newGame(int difficulty) {
@@ -146,10 +146,10 @@ void SudokuController::checkSolved() {
     gameStarted_ = false; // игра завершена
     stopTimer();          // остановить таймер
 
-    emit gameFinished();  // испускаем сигнал
+    emit gameFinished(); // испускаем сигнал
   }
 }
 
 void SudokuController::onGameSelected(int difficulty) {
-    newGame(difficulty);  // Начинаем новую игру с выбранной сложностью
+  newGame(difficulty); // Начинаем новую игру с выбранной сложностью
 }

@@ -1,11 +1,12 @@
 #pragma once
 #include "MainWindow.h"
-#include "StartWindow.h"
 #include "SudokuBoard.h"
 #include "SudokuGenerator.h"
 #include "SudokuSolver.h"
 #include <QMessageBox> // для отображения всплывающих сообщений пользователю
 #include <QTimer>      // Добавляем для таймера
+
+class MainWindow;
 
 // контроллер для управления игровой логикой судоку
 class SudokuController : public QObject {
@@ -23,7 +24,7 @@ public:
   int getErrorCount() const { return errorCount_; }
   QString formatTime(int seconds) const;
   void onGameSelected(int difficulty);
-
+  void setController(SudokuController *controller);
 private slots:
   // обработчик клика по клетке
   void onCellClicked(int row, int col);
