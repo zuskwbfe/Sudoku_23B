@@ -1,11 +1,9 @@
 # Библиотека представления
 add_library(view_lib STATIC
     MainWindow.cpp
-    StartWindow.cpp
     DifficultyDialog.cpp
     SudokuCell.cpp
     MainWindow.h
-    StartWindow.h
     DifficultyDialog.h
     SudokuCell.h
 )

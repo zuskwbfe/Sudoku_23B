@@ -17,7 +17,7 @@ void SudokuCell::setDisplayValue(int value) {
   if (value > 0) {
     p.setColor(QPalette::ButtonText, isOriginal_ ? Qt::black : Qt::blue);
   } else {
-    p.setColor(QPalette::ButtonText, Qt::black); // или Qt::gray, если хочешь
+    p.setColor(QPalette::ButtonText, Qt::black); // или Qt::gray
   }
   setPalette(p);
 }

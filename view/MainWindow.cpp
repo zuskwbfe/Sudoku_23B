@@ -1,66 +1,20 @@
 #include "MainWindow.h"
 #include "../model/SudokuBoard.h"
+#include "../controller/SudokuController.h"
 #include <QInputDialog>
 #include <QLabel>
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  // Создаем центральный виджет для размещения элементов
-  QWidget *centralWidget = new QWidget(this);
-  QVBoxLayout *mainLayout =
-      new QVBoxLayout(centralWidget); // Основной вертикальный layout
+  stackedWidget = new QStackedWidget(this);
+  setCentralWidget(stackedWidget);
 
-  // Создаём панель для таймера и ошибок
-  QHBoxLayout *infoLayout = new QHBoxLayout();
-  timerLabel = new QLabel("Время: 00:00", this);
-  errorLabel = new QLabel("Ошибки: 0", this);
+  createMainMenu();
+  createGameScreen();
 
-  infoLayout->addWidget(timerLabel);
-  infoLayout->addWidget(errorLabel);
-  mainLayout->addLayout(infoLayout);
-
-  // Инициализируем сетку 9x9 для расположения ячеек
-  gridLayout = new QGridLayout();
-  mainLayout->addLayout(gridLayout);
-
-  // Заполняем сетку ячейками SudokuCell
-  for (int i = 0; i < 9; ++i) {
-    for (int j = 0; j < 9; ++j) {
-      cells[i][j] = new SudokuCell(i, j);
-      gridLayout->addWidget(cells[i][j], i, j);
-
-      // Настройка стилей границ для разделения блоков
-      QString style = "SudokuCell {"
-                      "  border: none;"
-                      "  margin: 0;"
-                      "  padding: 0;"
-                      "  border-right: 1px solid black;"
-                      "  border-bottom: 1px solid black;"
-                      "}";
-
-      // Утолщение границ между блоками (столбцы 2, 5)
-      if (j == 2 || j == 5)
-        style += "SudokuCell { border-right-width: 2px; }";
-
-      // Утолщение границ между блоками (строки 2, 5)
-      if (i == 2 || i == 5)
-        style += "SudokuCell { border-bottom-width: 2px; }";
-
-      // Убрать границы у последнего столбца и строки
-      if (j == 8)
-        style += "SudokuCell { border-right: none; }";
-      if (i == 8)
-        style += "SudokuCell { border-bottom: none; }";
-
-      cells[i][j]->setStyleSheet(style);
-
-      // Подключаем сигнал клика ячейки к слоту CellClicked
-      connect(cells[i][j], &SudokuCell::cellClicked, this,
-              &MainWindow::CellClicked);
-    }
-  }
-  // Устанавливаем центральный виджет и заголовок окна
-  setCentralWidget(centralWidget);
-  setWindowTitle("Sudoku");
+  difficultyDialog = new DifficultyDialog(this);
+  stackedWidget->addWidget(menuScreen);
+  stackedWidget->addWidget(gameScreen);
 }
 
 // Обновление отображаемого значения в ячейке
@@ -108,4 +62,101 @@ void MainWindow::updateErrorDisplay(int errors) {
 void MainWindow::updateGameStats(const QString &time, int errors) {
   timerLabel->setText("Время: " + time);
   errorLabel->setText(QString("Ошибки: %1").arg(errors));
+}
+
+void MainWindow::createMainMenu() {
+  menuScreen = new QWidget;
+  QVBoxLayout *layout = new QVBoxLayout(menuScreen);
+
+  QPushButton *newGameBtn = new QPushButton("Новая игра");
+  QPushButton *exitBtn = new QPushButton("Выход");
+
+  layout->addStretch();
+  layout->addWidget(newGameBtn);
+  layout->addWidget(exitBtn);
+  layout->addStretch();
+
+  connect(newGameBtn, &QPushButton::clicked, this, &MainWindow::handleNewGame);
+  connect(exitBtn, &QPushButton::clicked, qApp, &QApplication::quit);
+}
+
+void MainWindow::createGameScreen() {
+  gameScreen = new QWidget;
+  QVBoxLayout *mainLayout = new QVBoxLayout(gameScreen);
+
+  // Панель информации
+  QHBoxLayout *infoLayout = new QHBoxLayout();
+  timerLabel = new QLabel("Время: 00:00");
+  errorLabel = new QLabel("Ошибки: 0");
+
+  // Кнопка возврата
+  QPushButton *backBtn = new QPushButton("В меню");
+  connect(backBtn, &QPushButton::clicked, this, &MainWindow::showMainMenu);
+
+  // Игровая сетка
+  gridLayout = new QGridLayout();
+
+  // Добавление элементов
+  infoLayout->addWidget(timerLabel);
+  infoLayout->addWidget(errorLabel);
+  mainLayout->addLayout(infoLayout);
+  mainLayout->addWidget(backBtn);
+  mainLayout->addLayout(gridLayout);
+
+  // Инициализация ячеек с оригинальной стилизацией
+  for (int row = 0; row < 9; ++row) {
+    for (int col = 0; col < 9; ++col) {
+      cells[row][col] = new SudokuCell(row, col);
+      gridLayout->addWidget(cells[row][col], row, col);
+
+      // Начальный стиль для всех ячеек
+      QString style = "SudokuCell {"
+                      "  border: none;"
+                      "  margin: 0;"
+                      "  padding: 0;"
+                      "  border-right: 1px solid black;"
+                      "  border-bottom: 1px solid black;"
+                      "}";
+
+      // Утолщение правой границы для столбцов 2 и 5
+      if (col == 2 || col == 5) {
+        style += "SudokuCell { border-right-width: 2px; }";
+      }
+
+      // Утолщение нижней границы для строк 2 и 5
+      if (row == 2 || row == 5) {
+        style += "SudokuCell { border-bottom-width: 2px; }";
+      }
+
+      // Удаление границ для последнего столбца и строки
+      if (col == 8) {
+        style += "SudokuCell { border-right: none; }";
+      }
+      if (row == 8) {
+        style += "SudokuCell { border-bottom: none; }";
+      }
+
+      cells[row][col]->setStyleSheet(style);
+
+      // Подключение сигналов
+      connect(cells[row][col], &SudokuCell::cellClicked,
+              [this, row, col]() { emit CellClicked(row, col); });
+    }
+  }
+}
+void MainWindow::handleNewGame() {
+  if (difficultyDialog->exec() == QDialog::Accepted) {
+    stackedWidget->setCurrentIndex(1);
+    emit controller->newGame(difficultyDialog->selectedDifficulty());
+  }
+}
+
+void MainWindow::showMainMenu() {
+  stackedWidget->setCurrentIndex(0);
+  controller->stopTimer();
+}
+
+void MainWindow::handleGameFinished() {
+  showMainMenu();
+  QMessageBox::information(this, "Поздравляем!", "Игра завершена!");
 }
