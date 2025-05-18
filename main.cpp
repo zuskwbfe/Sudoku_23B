@@ -2,32 +2,39 @@
 #include "model/SudokuBoard.h"
 #include "model/SudokuGenerator.h"
 #include "model/SudokuSolver.h"
-#include "view/MainWindow.h"
-#include "view/StartWindow.h"
 #include "view/DifficultyDialog.h"
+#include "view/MainWindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
+  QApplication app(argc, argv);
 
-    // Создаём модель, представление и контроллер
-    SudokuBoard board;
-    MainWindow *mainWindow = new MainWindow();
-    SudokuController *controller = new SudokuController(&board, mainWindow);
+  // Создаём модель, представление и контроллер
+  SudokuBoard board;
+  MainWindow mainWindow;
+  SudokuController controller(&board, &mainWindow);
 
-    // Создаём стартовое окно
-    StartWindow *startWindow = new StartWindow();
-    startWindow->show();
+  // Настраиваем связи
+  mainWindow.setController(&controller);
 
-    // Подключаем сигнал выбора сложности
-    QObject::connect(startWindow, &StartWindow::gameSelected,
-                 controller, &SudokuController::newGame);
+  // Показываем главное окно (в нём уже есть меню)
+  mainWindow.show();
 
-    startWindow->show();
+  return app.exec();
 
-    QObject::connect(controller, &SudokuController::gameFinished, [=]() {
-    mainWindow->hide();     // скрыть главное окно
-    startWindow->show();    // снова показать стартовое окно
-    });
-    return app.exec();
+  // // Создаём стартовое окно
+  // StartWindow *startWindow = new StartWindow();
+  // startWindow->show();
+
+  // // Подключаем сигнал выбора сложности
+  // QObject::connect(startWindow, &StartWindow::gameSelected,
+  //              controller, &SudokuController::newGame);
+
+  // startWindow->show();
+
+  // QObject::connect(controller, &SudokuController::gameFinished, [=]() {
+  // mainWindow->hide();     // скрыть главное окно
+  // startWindow->show();    // снова показать стартовое окно
+  // });
+  // return app.exec();
 }
