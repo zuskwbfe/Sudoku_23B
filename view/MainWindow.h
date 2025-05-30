@@ -34,6 +34,8 @@ public slots:
 
 private slots:
   void handleNewGame();
+  void handleCellSelected(int row, int col); // Новый слот для обработки выбора ячейки
+  void handleCellDoubleClicked(int row, int col);
 
 private:
   void createGameScreen();
@@ -54,9 +56,16 @@ private:
   // Навигация
   DifficultyDialog *difficultyDialog;
   SudokuController *controller;
+
+  // Методы для управления подсветкой
+  void clearHighlights();
+  void highlightRelatedCells(int row, int col);
+
+  void keyPressEvent(QKeyEvent* event) override;
 signals:
   // Сигнал при клике на ячейку
   void CellClicked(int row, int col);
+  void CellDoubleClicked(int row, int col);
   // Сигнал при вводе числа в ячейку
   void numberEntered(int row, int col, int value);
 };

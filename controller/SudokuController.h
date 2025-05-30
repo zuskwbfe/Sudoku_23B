@@ -24,10 +24,14 @@ public:
   int getErrorCount() const { return errorCount_; }
   QString formatTime(int seconds) const;
   void onGameSelected(int difficulty);
-  void setController(SudokuController *controller);
+  // void setController(SudokuController *controller);
+  int selectedRow() const { return selectedRow_; }
+  int selectedCol() const { return selectedCol_; }
+  bool isGameStarted() const { return gameStarted_; }
+
 private slots:
   // обработчик клика по клетке
-  void onCellClicked(int row, int col);
+  void handleCellInteraction(int row, int col);
   // обработчик ввода числа
   void onNumberEntered(int row, int col, int value);
   // проверка допустимости хода
@@ -53,4 +57,6 @@ private:
   QTimer *timer_;
   int secondsElapsed_; // таймер
   int errorCount_;     // счетчик ошибок
+
+  void processCellInput(int row, int col);
 };

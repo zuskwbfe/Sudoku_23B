@@ -4,6 +4,13 @@
 class SudokuCell : public QPushButton {
   Q_OBJECT
 public:
+
+ enum HighlightState {
+    Default,
+    Selected,
+    Related // Для связанных ячеек (строка/колонка/блок)
+  };
+
   SudokuCell(int row, int col, QWidget *parent = nullptr);
   void setDisplayValue(int value);
   void setOriginal(bool isOriginal);
@@ -11,9 +18,18 @@ public:
   int GetRow() const { return row; }
   int GetCol() const { return col; }
 
+  // Методы для управления подсветкой
+  void setHighlightState(HighlightState state);
+  HighlightState getHighlightState() const { return highlightState; }
+
 signals:
   // Сигнал клика на ячейку
   void cellClicked(int row, int col);
+  void cellDoubleClicked(int row, int col);
+
+protected:
+  void paintEvent(QPaintEvent* event) override; // Добавляем объявление
+  void mouseDoubleClickEvent(QMouseEvent* event) override;
 
 private:
   int row;
@@ -21,4 +37,6 @@ private:
   QColor originalColor = Qt::black;
   QColor userColor = QColor(31, 174, 233);
   bool isOriginal_ = false;
+
+  HighlightState highlightState = Default; // Состояние подсветки
 };

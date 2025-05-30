@@ -4,6 +4,7 @@
 #include <QInputDialog>
 #include <QLabel>
 #include <QApplication>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   stackedWidget = new QStackedWidget(this);
@@ -108,42 +109,15 @@ void MainWindow::createGameScreen() {
     for (int col = 0; col < 9; ++col) {
       cells[row][col] = new SudokuCell(row, col);
       gridLayout->addWidget(cells[row][col], row, col);
-
-      // Начальный стиль для всех ячеек
-      QString style = "SudokuCell {"
-                      "  border: none;"
-                      "  margin: 0;"
-                      "  padding: 0;"
-                      "  border-right: 1px solid black;"
-                      "  border-bottom: 1px solid black;"
-                      "}";
-
-      // Утолщение правой границы для столбцов 2 и 5
-      if (col == 2 || col == 5) {
-        style += "SudokuCell { border-right-width: 2px; }";
-      }
-
-      // Утолщение нижней границы для строк 2 и 5
-      if (row == 2 || row == 5) {
-        style += "SudokuCell { border-bottom-width: 2px; }";
-      }
-
-      // Удаление границ для последнего столбца и строки
-      if (col == 8) {
-        style += "SudokuCell { border-right: none; }";
-      }
-      if (row == 8) {
-        style += "SudokuCell { border-bottom: none; }";
-      }
-
-      cells[row][col]->setStyleSheet(style);
+      connect(cells[row][col], &SudokuCell::cellClicked,
+              this, &MainWindow::handleCellSelected);
 
       // Подключение сигналов
-      connect(cells[row][col], &SudokuCell::cellClicked,
-              [this, row, col]() { emit CellClicked(row, col); });
+      connect(cells[row][col], &SudokuCell::cellDoubleClicked,
+              this, &MainWindow::handleCellDoubleClicked); };
     }
   }
-}
+
 void MainWindow::handleNewGame() {
   if (difficultyDialog->exec() == QDialog::Accepted) {
     stackedWidget->setCurrentIndex(1);
@@ -159,4 +133,76 @@ void MainWindow::showMainMenu() {
 void MainWindow::handleGameFinished() {
   showMainMenu();
   QMessageBox::information(this, "Поздравляем!", "Игра завершена!");
+}
+
+// Для обработки выбора ячейки
+void MainWindow::handleCellSelected(int row, int col) {
+  clearHighlights();
+  highlightRelatedCells(row, col);
+
+  // Испускаем сигнал для контроллера
+  emit CellClicked(row, col);
+}
+
+// Сбрасываем подсветку во всех ячейках
+void MainWindow::clearHighlights() {
+  for (int row = 0; row < 9; ++row) {
+    for (int col = 0; col < 9; ++col) {
+      cells[row][col]->setHighlightState(SudokuCell::Default);
+    }
+  }
+}
+
+// Подсвечиваем связанные ячейки
+void MainWindow::highlightRelatedCells(int row, int col) {
+  // Подсветка строки и столбца
+  for (int i = 0; i < 9; ++i) {
+    cells[row][i]->setHighlightState(SudokuCell::Related);
+    cells[i][col]->setHighlightState(SudokuCell::Related);
+  }
+
+  // Подсветка блока 3x3
+  int blockRow = (row / 3) * 3;
+  int blockCol = (col / 3) * 3;
+  for (int r = blockRow; r < blockRow + 3; ++r) {
+    for (int c = blockCol; c < blockCol + 3; ++c) {
+      cells[r][c]->setHighlightState(SudokuCell::Related);
+    }
+  }
+
+  // Подсветка самой ячейки
+  cells[row][col]->setHighlightState(SudokuCell::Selected);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event) {
+    if (controller && controller->isGameStarted()) {
+        int row = controller->selectedRow();
+        int col = controller->selectedCol();
+
+        if (row >= 0 && col >= 0) {
+            int key = event->key();
+
+            // Обработка цифр 1-9
+            if (key >= Qt::Key_1 && key <= Qt::Key_9) {
+                int value = key - Qt::Key_0;
+                emit numberEntered(row, col, value);
+            }
+            // Обработка Backspace и Delete для очистки
+            else if (key == Qt::Key_Backspace || key == Qt::Key_Delete) {
+                emit numberEntered(row, col, 0);
+            }
+        }
+    }
+
+    QMainWindow::keyPressEvent(event);
+}
+
+// Слот для обработки двойного клика
+void MainWindow::handleCellDoubleClicked(int row, int col) {
+  // Испускаем специальный сигнал для двойного клика
+  emit CellDoubleClicked(row, col);
+}
+
+void MainWindow::setController(SudokuController *ctrl) {
+    controller = ctrl;
 }

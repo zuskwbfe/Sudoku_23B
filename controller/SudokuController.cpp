@@ -9,8 +9,8 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
       generator_(&solver_), selectedRow_(-1), selectedCol_(-1),
       gameStarted_(false) {
   // соединение сигнала клика по ячейке со слотом обработки
-  connect(view_, &MainWindow::CellClicked, this,
-          &SudokuController::onCellClicked);
+  connect(view_, &MainWindow::CellClicked, this, &SudokuController::handleCellInteraction);
+  connect(view_, &MainWindow::CellDoubleClicked, this, &SudokuController::processCellInput);
 
   // Инициализация таймера
   timer_ = new QTimer(this);
@@ -27,8 +27,6 @@ QString SudokuController::formatTime(int seconds) const {
       .arg(minutes, 2, 10, QLatin1Char('0'))
       .arg(secs, 2, 10, QLatin1Char('0'));
 }
-
-void MainWindow::setController(SudokuController *ctrl) { controller = ctrl; }
 
 // Начинает новую игру, генерирует доску судоку с заданной сложностью.
 void SudokuController::newGame(int difficulty) {
@@ -79,32 +77,6 @@ void SudokuController::updateTimer() {
   view_->updateTimerDisplay(secondsElapsed_); // Обновляем UI
 }
 
-// слот обработки клика по ячейке
-void SudokuController::onCellClicked(int row, int col) {
-  if (!gameStarted_)
-    return; // если игра не начата - игнорируем
-
-  // запоминаем выбранную ячейку
-  selectedRow_ = row;
-  selectedCol_ = col;
-
-  // отображаем диалог ввода числа
-  bool ok;
-  int value = QInputDialog::getInt(view_, tr("Введите число"),
-                                   tr("Число (1-9, 0 для очистки):"),
-                                   0, // значение по умолчанию
-                                   0, // минимум
-                                   9, // максимум
-                                   1, // шаг
-                                   &ok // флаг подтверждения ввода
-  );
-
-  // если пользователь подтвердил ввод
-  if (ok) {
-    onNumberEntered(row, col, value);
-  }
-}
-
 // обработка введенного числа
 void SudokuController::onNumberEntered(int row, int col, int value) {
   if (board_->isCellOriginal(row, col)) {
@@ -152,4 +124,26 @@ void SudokuController::checkSolved() {
 
 void SudokuController::onGameSelected(int difficulty) {
   newGame(difficulty); // Начинаем новую игру с выбранной сложностью
+}
+
+void SudokuController::handleCellInteraction(int row, int col) {
+  if (!gameStarted_) return;
+
+  // Запоминаем выбранную ячейку
+  selectedRow_ = row;
+  selectedCol_ = col;
+}
+
+// Обработчик ввода (вызывается при двойном клике)
+void SudokuController::processCellInput(int row, int col) {
+  if (!gameStarted_) return;
+
+  bool ok;
+  int value = QInputDialog::getInt(view_, tr("Введите число"),
+                                 tr("Число (1-9, 0 для очистки:"),
+                                 0, 0, 9, 1, &ok);
+
+  if (ok) {
+    onNumberEntered(row, col, value);
+  }
 }
