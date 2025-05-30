@@ -24,10 +24,10 @@ public:
   int getErrorCount() const { return errorCount_; }
   QString formatTime(int seconds) const;
   void onGameSelected(int difficulty);
-  // void setController(SudokuController *controller);
   int selectedRow() const { return selectedRow_; }
   int selectedCol() const { return selectedCol_; }
   bool isGameStarted() const { return gameStarted_; }
+  SudokuBoard* getBoard() const { return board_; }
 
 private slots:
   // обработчик клика по клетке

@@ -15,8 +15,6 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   // Инициализация таймера
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, &SudokuController::updateTimer);
-
-  newGame(0);
 }
 
 // Форматирует время в формат "мм:сс" для отображения на UI.
@@ -33,7 +31,14 @@ void SudokuController::newGame(int difficulty) {
   board_->clear(); // Очищаем доску
   board_->clearOriginals(); // Сбрасываем метки исходных чисел
   generator_.generate(*board_, difficulty);
-  view_->setBoard(*board_);
+
+  // Вместо view_->setBoard(*board_) обновляем ячейки вручную
+  for (int row = 0; row < 9; ++row) {
+    for (int col = 0; col < 9; ++col) {
+      view_->UpdateCell(row, col, board_->getCellValue(row, col));
+      view_->getCell(row, col)->setOriginal(board_->isCellOriginal(row, col));
+    }
+  }
 
   // Инициализация параметров игры
   gameStarted_ = true;
@@ -45,13 +50,6 @@ void SudokuController::newGame(int difficulty) {
 
   // передаём ошибки и время в MainWindow
   view_->updateGameStats(formatTime(secondsElapsed_), errorCount_);
-
-  // обновление всех ячеек на представлении
-  for (int row = 0; row < 9; ++row) {
-    for (int col = 0; col < 9; ++col) {
-      view_->UpdateCell(row, col, board_->getCellValue(row, col));
-    }
-  }
 
   // сброс выбранной ячейки
   selectedRow_ = -1;
@@ -103,6 +101,13 @@ void SudokuController::onNumberEntered(int row, int col, int value) {
     cell->setOriginal(false);
     cell->setDisplayValue(value);
   }
+
+  // Обновляем подсветку после изменения значения
+  // if (selectedRow_ == row && selectedCol_ == col) {
+  //   selectedRow_ = row;
+  //   selectedCol_ = col;
+  // }
+  view_->refreshHighlight();
 
   checkSolved();
 } // проверка допустимости введенного числа

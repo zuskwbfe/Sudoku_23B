@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QMouseEvent>
+#include <QDebug>
 
 SudokuCell::SudokuCell(int r, int c, QWidget *parent)
     : QPushButton(parent), row(r), col(c) {
@@ -14,20 +15,26 @@ SudokuCell::SudokuCell(int r, int c, QWidget *parent)
 
 // Установка отображаемого значения в ячейке
 void SudokuCell::setDisplayValue(int value) {
+  currentValue_ = value; // Сохраняем текущее значение
   setText(value > 0 ? QString::number(value) : "");
-
-  QPalette p = palette();
-  if (value > 0) {
-    p.setColor(QPalette::ButtonText, isOriginal_ ? Qt::black : Qt::blue);
-  } else {
-    p.setColor(QPalette::ButtonText, Qt::black); // или Qt::gray
-  }
-  setPalette(p);
+  updateTextColor(); // Обновляем цвет текста
 }
 
 void SudokuCell::setOriginal(bool isOriginal) {
   isOriginal_ = isOriginal;
+  updateTextColor(); // Обновляем цвет текста при изменении флага
   update(); // Триггер перерисовки
+}
+
+// Обновление цвета текста в зависимости от типа ячейки
+void SudokuCell::updateTextColor() {
+  QPalette p = palette();
+  if (currentValue_ > 0) {
+    p.setColor(QPalette::ButtonText, isOriginal_ ? Qt::black : QColor(0, 0, 255));
+  } else {
+    p.setColor(QPalette::ButtonText, Qt::black);
+  }
+  setPalette(p);
 }
 
 // Устанавливаем состояние подсветки и перерисовываем ячейку
@@ -51,6 +58,9 @@ void SudokuCell::paintEvent(QPaintEvent* event) {
       break;
     case Related:
       painter.fillRect(rect(), QColor(230, 240, 255)); // Голубой
+      break;
+    case SameDigit:
+      painter.fillRect(rect(), QColor(100, 149, 237)); // Желтый для одинаковых цифр
       break;
     default:
       painter.fillRect(rect(), Qt::white);

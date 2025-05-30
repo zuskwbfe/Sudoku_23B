@@ -8,7 +8,8 @@ public:
  enum HighlightState {
     Default,
     Selected,
-    Related // Для связанных ячеек (строка/колонка/блок)
+    Related, // Для связанных ячеек (строка/колонка/блок)
+    SameDigit // Для одинаковых цифр
   };
 
   SudokuCell(int row, int col, QWidget *parent = nullptr);
@@ -34,9 +35,9 @@ protected:
 private:
   int row;
   int col;
-  QColor originalColor = Qt::black;
-  QColor userColor = QColor(31, 174, 233);
+  int currentValue_ = 0; // Текущее значение ячейки
   bool isOriginal_ = false;
-
   HighlightState highlightState = Default; // Состояние подсветки
+
+  void updateTextColor(); // Обновление цвета текста
 };
