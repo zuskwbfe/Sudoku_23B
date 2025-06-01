@@ -59,14 +59,14 @@ void SudokuCell::paintEvent(QPaintEvent *event) {
   // Рисуем фон в зависимости от состояния подсветки
   switch (highlightState) {
   case Selected:
-    painter.fillRect(rect(), QColor(120, 120, 190)); // Оранжевый
+    painter.fillRect(rect(), QColor(120, 120, 190)); // Фиолетовый
     break;
   case Related:
-    painter.fillRect(rect(), QColor(187, 187, 222)); // Голубой
+    painter.fillRect(rect(), QColor(187, 187, 222)); // Сереневый
     break;
   case SameDigit:
     painter.fillRect(rect(),
-                     QColor(120, 120, 190)); // Желтый для одинаковых цифр
+                     QColor(120, 120, 190)); // Фиолетовый
     break;
   default:
     painter.fillRect(rect(), Qt::white);
