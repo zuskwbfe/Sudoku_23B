@@ -32,8 +32,10 @@ public:
   void toggleNoteMode() { noteMode_ = !noteMode_; }
   bool isNoteMode() const { return noteMode_; }
   void handleNote(int row, int col, int value);
+  void clearNotesInArea(int row, int col, int value);
+  void clearNoteInCell(int row, int col, int value);
 
-  private slots:
+private slots:
   // обработчик клика по клетке
   void handleCellInteraction(int row, int col);
   // обработчик ввода числа

@@ -18,6 +18,9 @@ SudokuCell::SudokuCell(int r, int c, QWidget *parent)
 void SudokuCell::setDisplayValue(int value) {
   currentValue_ = value; // Сохраняем текущее значение
   setText(value > 0 ? QString::number(value) : "");
+  if (value != 0) {
+    clearNotes();
+  }
   updateTextColor(); // Обновляем цвет текста
 }
 

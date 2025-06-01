@@ -109,11 +109,10 @@ void SudokuController::onNumberEntered(int row, int col, int value) {
     cell->setDisplayValue(value);
   }
 
-  // Обновляем подсветку после изменения значения
-  // if (selectedRow_ == row && selectedCol_ == col) {
-  //   selectedRow_ = row;
-  //   selectedCol_ = col;
-  // }
+  if (value != 0) {
+    clearNotesInArea(row, col, value);
+  }
+
   view_->refreshHighlight();
 
   checkSolved();
@@ -175,5 +174,47 @@ void SudokuController::handleNote(int row, int col, int value) {
   SudokuCell *cell = view_->getCell(row, col);
   if (cell) {
     cell->setNote(value, !currentState);
+  }
+}
+
+void SudokuController::clearNotesInArea(int row, int col, int value) {
+  if (!gameStarted_ || value < 1 || value > 9)
+    return;
+
+  // Очистка в строке
+  for (int c = 0; c < 9; ++c) {
+    if (c != col) { // Пропускаем текущую ячейку
+      clearNoteInCell(row, c, value);
+    }
+  }
+
+  // Очистка в столбце
+  for (int r = 0; r < 9; ++r) {
+    if (r != row) { // Пропускаем текущую ячейку
+      clearNoteInCell(r, col, value);
+    }
+  }
+
+  // Очистка в блоке 3x3
+  int blockRowStart = row - row % 3;
+  int blockColStart = col - col % 3;
+  for (int r = blockRowStart; r < blockRowStart + 3; ++r) {
+    for (int c = blockColStart; c < blockColStart + 3; ++c) {
+      if (r != row || c != col) { // Пропускаем текущую ячейку
+        clearNoteInCell(r, c, value);
+      }
+    }
+  }
+}
+
+void SudokuController::clearNoteInCell(int row, int col, int value) {
+  // Очищаем пометку в модели
+  board_->setNote(row, col, value, false);
+
+  // Обновляем отображение ячейки
+  SudokuCell *cell = view_->getCell(row, col);
+  if (cell) {
+    cell->setNote(value, false);
+    cell->update(); // Принудительное обновление
   }
 }
