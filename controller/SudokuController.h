@@ -46,11 +46,14 @@ private slots:
   void checkSolved();
   // обновления таймера
   void updateTimer();
+  void checkGameOver(); // Новый слот для проверки завершения игры
 
 signals:
   void gameCompleted();
 
 private:
+  const int MAX_ERRORS = 3; // Максимальное количество ошибок
+
   SudokuBoard *board_;
   MainWindow *view_;
   BacktrackingSolver solver_; // Use a concrete solver

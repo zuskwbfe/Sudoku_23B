@@ -92,9 +92,16 @@ void SudokuController::onNumberEntered(int row, int col, int value) {
 
   // Добавляем проверку
   if (value != 0 && !board_->isValidMove(row, col, value)) {
-    QMessageBox::warning(view_, "Ошибка", "Недопустимое значение!");
     errorCount_++;
     view_->updateErrorDisplay(errorCount_);
+
+    // Проверяем, не превысили ли лимит ошибок
+    if (errorCount_ >= MAX_ERRORS) {
+      checkGameOver();
+    } else {
+      QMessageBox::warning(view_, "Ошибка", "Недопустимое значение!");
+    }
+
     view_->UpdateCell(row, col, board_->getCellValue(row, col));
     return;
   }
@@ -217,5 +224,22 @@ void SudokuController::clearNoteInCell(int row, int col, int value) {
   if (cell) {
     cell->setNote(value, false);
     cell->update(); // Принудительное обновление
+  }
+}
+
+void SudokuController::checkGameOver() {
+  if (errorCount_ >= MAX_ERRORS) {
+    gameStarted_ = false;
+    stopTimer();
+
+    // Показываем сообщение о завершении игры
+    QMessageBox gameOverBox;
+    gameOverBox.setWindowTitle("Игра завершена");
+    gameOverBox.setText("Вы совершили 3 ошибки! Игра завершена.");
+    gameOverBox.setStandardButtons(QMessageBox::Ok);
+    gameOverBox.exec();
+
+    // Испускаем сигнал завершения игры
+    emit gameCompleted();
   }
 }
