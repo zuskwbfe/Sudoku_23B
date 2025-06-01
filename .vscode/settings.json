@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "/wsl.localhost/Ubuntu-24.04/home/kaguya80/Sudoku_23B"
+    "cmake.sourceDirectory": "/wsl.localhost/Ubuntu-24.04/home/kaguya80/Sudoku_23B",
+    "files.associations": {
+        "array": "cpp"
+    }
 }

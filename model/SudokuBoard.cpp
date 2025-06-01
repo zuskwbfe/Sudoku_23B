@@ -13,41 +13,41 @@ void SudokuBoard::setCellValue(int row, int col, int value) {
 }
 
 // Проверка допустимости хода
-bool SudokuBoard::isValidMove(int row, int col, int value) const {
-  if (value < 0 || value > 9) {
-    return false;
-  }
+// bool SudokuBoard::isValidMove(int row, int col, int value) const {
+//   if (value < 0 || value > 9) {
+//     return false;
+//   }
 
-  if (value == 0)
-    return true; // Всегда разрешаем очистку клетки (установку 0)
+//   if (value == 0)
+//     return true; // Всегда разрешаем очистку клетки (установку 0)
 
-  // Проверка строки на дублирование числа
-  for (int c = 0; c < 9; ++c) {
-    if (board_[row][c] == value && c != col) {
-      return false;
-    }
-  }
+//   // Проверка строки на дублирование числа
+//   for (int c = 0; c < 9; ++c) {
+//     if (board_[row][c] == value && c != col) {
+//       return false;
+//     }
+//   }
 
-  // Проверка столбца на дублирование числа
-  for (int r = 0; r < 9; ++r) {
-    if (board_[r][col] == value && r != row) {
-      return false;
-    }
-  }
+//   // Проверка столбца на дублирование числа
+//   for (int r = 0; r < 9; ++r) {
+//     if (board_[r][col] == value && r != row) {
+//       return false;
+//     }
+//   }
 
-  // Проверка подквадрата 3x3 на дублирование числа
-  int subgridRowStart = row - row % 3;
-  int subgridColStart = col - col % 3;
-  for (int r = subgridRowStart; r < subgridRowStart + 3; ++r) {
-    for (int c = subgridColStart; c < subgridColStart + 3; ++c) {
-      if (board_[r][c] == value && (r != row || c != col)) {
-        return false;
-      }
-    }
-  }
+//   // Проверка подквадрата 3x3 на дублирование числа
+//   int subgridRowStart = row - row % 3;
+//   int subgridColStart = col - col % 3;
+//   for (int r = subgridRowStart; r < subgridRowStart + 3; ++r) {
+//     for (int c = subgridColStart; c < subgridColStart + 3; ++c) {
+//       if (board_[r][c] == value && (r != row || c != col)) {
+//         return false;
+//       }
+//     }
+//   }
 
-  return true; // Ход допустим
-}
+//   return true; // Ход допустим
+// }
 
 // Проверка полностью решённого судоку
 bool SudokuBoard::isSolved() const {
@@ -99,4 +99,80 @@ void SudokuBoard::clear() {
     std::fill(row.begin(), row.end(), 0);
   }
   clearOriginals();
+  for (auto &row : solution_) {
+    std::fill(row.begin(), row.end(), 0);
+  }
+  hasSolution_ = false;
+}
+
+void SudokuBoard::copyFrom(const SudokuBoard &source) {
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      board_[r][c] = source.board_[r][c];
+      originalCells_[r][c] = source.originalCells_[r][c];
+    }
+  }
+}
+
+bool SudokuBoard::equals(const SudokuBoard &other) const {
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      if (board_[r][c] != other.board_[r][c]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+void SudokuBoard::setSolution(const SudokuBoard &solvedBoard) {
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      solution_[r][c] = solvedBoard.getCellValue(r, c);
+    }
+  }
+  hasSolution_ = true;
+}
+
+bool SudokuBoard::isValidMove(int row, int col, int value) const {
+  if (value < 0 || value > 9) {
+    return false;
+  }
+
+  if (value == 0) {
+    return true; // Разрешаем очистку ячейки
+  }
+
+  // Если есть сохранённое решение, проверяем соответствие ему
+  if (hasSolution_) {
+    return value == solution_[row][col];
+  }
+
+  // Если решения нет, используем стандартные проверки
+  // Проверка строки
+  for (int c = 0; c < 9; ++c) {
+    if (board_[row][c] == value && c != col) {
+      return false;
+    }
+  }
+
+  // Проверка столбца
+  for (int r = 0; r < 9; ++r) {
+    if (board_[r][col] == value && r != row) {
+      return false;
+    }
+  }
+
+  // Проверка квадрата 3x3
+  int subgridRowStart = row - row % 3;
+  int subgridColStart = col - col % 3;
+  for (int r = subgridRowStart; r < subgridRowStart + 3; ++r) {
+    for (int c = subgridColStart; c < subgridColStart + 3; ++c) {
+      if (board_[r][c] == value && (r != row || c != col)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }

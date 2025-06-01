@@ -19,6 +19,11 @@ public:
   void setCellOriginal(int row, int col, bool original);
   void clearOriginals();
 
+  void setSolution(const SudokuBoard &solvedBoard);
+
+  void copyFrom(const SudokuBoard &source);
+  bool equals(const SudokuBoard &other) const;
+
   // Iterator (паттерн Итератор)
   class Iterator {
   public:
@@ -45,4 +50,6 @@ private:
   // Внутреннее представление доски - двумерный массив 9x9
   std::array<std::array<int, 9>, 9> board_;
   std::array<std::array<bool, 9>, 9> originalCells_ = {}; // Новое поле
+  std::array<std::array<int, 9>, 9> solution_;
+  bool hasSolution_ = false;
 };
