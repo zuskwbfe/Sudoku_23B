@@ -4,13 +4,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-class DifficultyDialog : public QDialog {
+class DifficultyDialog  : public QDialog {
     Q_OBJECT
 
 public:
     explicit DifficultyDialog(QWidget *parent = nullptr);
-
-    int selectedDifficulty() const { return selectedDifficulty_; }
+    int getSelectedDifficulty() const;
 
 private slots:
     void onEasyClicked();

@@ -48,7 +48,7 @@ private slots:
   void updateTimer();
 
 signals:
-  void gameFinished();
+  void gameCompleted();
 
 private:
   SudokuBoard *board_;

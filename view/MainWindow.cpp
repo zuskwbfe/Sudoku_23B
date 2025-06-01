@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   difficultyDialog = new DifficultyDialog(this);
   stackedWidget->addWidget(menuScreen);
   stackedWidget->addWidget(gameScreen);
+  stackedWidget->setCurrentIndex(0);
 }
 
 // Обновление отображаемого значения в ячейке
@@ -152,18 +153,13 @@ void MainWindow::createGameScreen() {
 void MainWindow::handleNewGame() {
   if (difficultyDialog->exec() == QDialog::Accepted) {
     stackedWidget->setCurrentIndex(1);
-    emit controller->newGame(difficultyDialog->selectedDifficulty());
+    emit controller->newGame(difficultyDialog->getSelectedDifficulty());
   }
 }
 
 void MainWindow::showMainMenu() {
   stackedWidget->setCurrentIndex(0);
   controller->stopTimer();
-}
-
-void MainWindow::handleGameFinished() {
-  showMainMenu();
-  QMessageBox::information(this, "Поздравляем!", "Игра завершена!");
 }
 
 // Для обработки выбора ячейки
@@ -290,7 +286,9 @@ void MainWindow::handleCellDoubleClicked(int row, int col) {
 
 void MainWindow::setController(SudokuController *ctrl) {
   controller = ctrl;
-  // Принудительно обновляем доску при установке контроллера
+  connect(controller, &SudokuController::gameCompleted, this,
+          &MainWindow::handleGameCompleted); // Принудительно обновляем доску
+                                             // при установке контроллера
   if (controller && controller->getBoard()) {
     for (int row = 0; row < 9; ++row) {
       for (int col = 0; col < 9; ++col) {
@@ -308,5 +306,20 @@ void MainWindow::refreshHighlight() {
     if (row >= 0 && col >= 0) {
       handleCellSelected(row, col);
     }
+  }
+}
+
+void MainWindow::handleGameCompleted() {
+  // Показываем диалог выбора сложности
+  DifficultyDialog dialog(this);
+  dialog.setWindowTitle("Новая игра");
+
+  if (dialog.exec() == QDialog::Accepted) {
+    // Запускаем новую игру с выбранной сложностью
+    int difficulty = dialog.getSelectedDifficulty();
+    controller->newGame(difficulty);
+  } else {
+    // Возвращаемся в главное меню
+    showMainMenu();
   }
 }

@@ -22,20 +22,20 @@ public:
   void updateGameStats(const QString &time,
                        int errors); // Комбинированный метод
   SudokuCell *getCell(int row, int col);
-  // SudokuBoard &getBoard() { return board; } // получение доступа к модели доски
+  // SudokuBoard &getBoard() { return board; } // получение доступа к модели
+  // доски
   void updateBoard(); // обновление отображения всей доски
   void setController(SudokuController *controller);
   void refreshHighlight();
 
 public slots:
   void showMainMenu();
-  void handleGameFinished();
+  void handleGameCompleted();
   void handleCellSelected(int row, int col);
   void handleCellDoubleClicked(int row, int col);
 
 private slots:
   void handleNewGame();
-
 
 private:
   void createGameScreen();
@@ -61,7 +61,7 @@ private:
   void clearHighlights();
   void highlightRelatedCells(int row, int col);
   void highlightSameDigits(int row, int col);
-  void keyPressEvent(QKeyEvent* event) override;
+  void keyPressEvent(QKeyEvent *event) override;
 
 signals:
   // Сигнал при клике на ячейку

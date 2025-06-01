@@ -1,6 +1,7 @@
 #include "DifficultyDialog.h"
 
-DifficultyDialog::DifficultyDialog(QWidget *parent) : QDialog(parent), selectedDifficulty_(1) {
+DifficultyDialog::DifficultyDialog(QWidget *parent)
+    : QDialog(parent), selectedDifficulty_(1) {
     setWindowTitle("Выбор сложности");
     resize(250, 150);
 
@@ -35,4 +36,9 @@ void DifficultyDialog::onMediumClicked() {
 void DifficultyDialog::onHardClicked() {
     selectedDifficulty_ = 2;  // Сложный
     accept();
+}
+
+// Правильная реализация метода
+int DifficultyDialog::getSelectedDifficulty() const {
+    return selectedDifficulty_;
 }

@@ -125,12 +125,13 @@ bool SudokuController::checkInput(int row, int col, int value) {
 // проверка полностью решенного судоку
 void SudokuController::checkSolved() {
   if (board_->isSolved()) {
+    // Показываем сообщение о победе
     QMessageBox::information(view_, tr("Поздравляем!"),
                              tr("Вы решили судоку!"));
-    gameStarted_ = false; // игра завершена
-    stopTimer();          // остановить таймер
-
-    emit gameFinished(); // испускаем сигнал
+    // Испускаем сигнал о завершении игры
+    gameStarted_ = false;
+    stopTimer();
+    emit gameCompleted();
   }
 }
 
