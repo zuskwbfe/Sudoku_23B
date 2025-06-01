@@ -35,7 +35,7 @@ void SudokuCell::updateTextColor() {
   QPalette p = palette();
   if (currentValue_ > 0) {
     p.setColor(QPalette::ButtonText,
-               isOriginal_ ? Qt::black : QColor(0, 0, 255));
+               isOriginal_ ? Qt::black : QColor(75, 75, 155)); // цифра
   } else {
     p.setColor(QPalette::ButtonText, Qt::black);
   }
@@ -59,14 +59,14 @@ void SudokuCell::paintEvent(QPaintEvent *event) {
   // Рисуем фон в зависимости от состояния подсветки
   switch (highlightState) {
   case Selected:
-    painter.fillRect(rect(), QColor(100, 149, 237)); // Оранжевый
+    painter.fillRect(rect(), QColor(120, 120, 190)); // Оранжевый
     break;
   case Related:
-    painter.fillRect(rect(), QColor(230, 240, 255)); // Голубой
+    painter.fillRect(rect(), QColor(187, 187, 222)); // Голубой
     break;
   case SameDigit:
     painter.fillRect(rect(),
-                     QColor(100, 149, 237)); // Желтый для одинаковых цифр
+                     QColor(120, 120, 190)); // Желтый для одинаковых цифр
     break;
   default:
     painter.fillRect(rect(), Qt::white);
