@@ -1,10 +1,10 @@
 #include "MainWindow.h"
-#include "../model/SudokuBoard.h"
 #include "../controller/SudokuController.h"
-#include <QInputDialog>
-#include <QLabel>
+#include "../model/SudokuBoard.h"
 #include <QApplication>
+#include <QInputDialog>
 #include <QKeyEvent>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // Инициализация массива ячеек нулевыми указателями
@@ -27,12 +27,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 // Обновление отображаемого значения в ячейке
 void MainWindow::UpdateCell(int row, int col, int value) {
-  if (row < 0 || row >= 9 || col < 0 || col >= 9) return;
+  if (row < 0 || row >= 9 || col < 0 || col >= 9)
+    return;
 
   // Проверка существования ячейки
   if (!cells[row][col]) {
-      qWarning() << "Cell not initialized at" << row << col;
-      return;
+    qWarning() << "Cell not initialized at" << row << col;
+    return;
+  }
+  if (value != 0) {
+    cells[row][col]->clearNotes();
   }
 
   // Обновляем значение ячейки
@@ -40,7 +44,8 @@ void MainWindow::UpdateCell(int row, int col, int value) {
 
   // Устанавливаем флаг "оригинальности" только если контроллер доступен
   if (controller && controller->getBoard()) {
-    cells[row][col]->setOriginal(controller->getBoard()->isCellOriginal(row, col));
+    cells[row][col]->setOriginal(
+        controller->getBoard()->isCellOriginal(row, col));
   }
 }
 
@@ -50,16 +55,19 @@ SudokuCell *MainWindow::getCell(int row, int col) {
 
   // Проверка инициализации ячейки
   if (!cells[row][col]) {
-      qWarning() << "Requested null cell at" << row << col;
-      return nullptr;
+    qWarning() << "Requested null cell at" << row << col;
+    return nullptr;
   }
 
   return cells[row][col];
 }
+
 void MainWindow::updateBoard() {
-  if (!controller) return;
-  SudokuBoard* board = controller->getBoard();
-  if (!board) return;
+  if (!controller)
+    return;
+  SudokuBoard *board = controller->getBoard();
+  if (!board)
+    return;
 
   for (int i = 0; i < 9; ++i) {
     for (int j = 0; j < 9; ++j) {
@@ -67,7 +75,6 @@ void MainWindow::updateBoard() {
       cells[i][j]->setOriginal(board->isCellOriginal(i, j));
     }
   }
-
 }
 
 void MainWindow::updateTimerDisplay(int seconds) {
@@ -132,12 +139,12 @@ void MainWindow::createGameScreen() {
     for (int col = 0; col < 9; ++col) {
       cells[row][col] = new SudokuCell(row, col);
       gridLayout->addWidget(cells[row][col], row, col);
-      connect(cells[row][col], &SudokuCell::cellClicked,
-              this, &MainWindow::handleCellSelected);
+      connect(cells[row][col], &SudokuCell::cellClicked, this,
+              &MainWindow::handleCellSelected);
 
       // Подключение сигналов
-      connect(cells[row][col], &SudokuCell::cellDoubleClicked,
-              this, &MainWindow::handleCellDoubleClicked);
+      connect(cells[row][col], &SudokuCell::cellDoubleClicked, this,
+              &MainWindow::handleCellDoubleClicked);
     }
   }
 }
@@ -161,23 +168,26 @@ void MainWindow::handleGameFinished() {
 
 // Для обработки выбора ячейки
 void MainWindow::handleCellSelected(int row, int col) {
-  if (!controller || !controller->isGameStarted()) return;
+  if (!controller || !controller->isGameStarted())
+    return;
 
-  SudokuBoard* board = controller->getBoard();
-  if (!board) return;
+  SudokuBoard *board = controller->getBoard();
+  if (!board)
+    return;
 
   clearHighlights();
   highlightRelatedCells(row, col);
 
   // Подсвечиваем одинаковые цифры
- int clickedValue = board->getCellValue(row, col);
+  int clickedValue = board->getCellValue(row, col);
 
   // Если ячейка не пустая
   if (clickedValue > 0) {
     for (int r = 0; r < 9; ++r) {
       for (int c = 0; c < 9; ++c) {
         // Пропускаем текущую ячейку (она уже подсвечена)
-        if (r == row && c == col) continue;
+        if (r == row && c == col)
+          continue;
 
         // Если значение совпадает - подсвечиваем
         if (board->getCellValue(r, c) == clickedValue) {
@@ -223,10 +233,12 @@ void MainWindow::highlightRelatedCells(int row, int col) {
 
 // Подсвечиваем ячейки с той же цифрой
 void MainWindow::highlightSameDigits(int row, int col) {
-  if (!controller) return;
+  if (!controller)
+    return;
 
-  SudokuBoard* board = controller->getBoard(); // Получаем актуальную доску
-  if (!board) return;
+  SudokuBoard *board = controller->getBoard(); // Получаем актуальную доску
+  if (!board)
+    return;
 
   int clickedValue = board->getCellValue(row, col);
   // Если ячейка не пустая
@@ -234,7 +246,8 @@ void MainWindow::highlightSameDigits(int row, int col) {
     for (int r = 0; r < 9; ++r) {
       for (int c = 0; c < 9; ++c) {
         // Пропускаем текущую ячейку (она уже подсвечена)
-        if (r == row && c == col) continue;
+        if (r == row && c == col)
+          continue;
 
         // Если значение совпадает - подсвечиваем
         if (board->getCellValue(r, c) == clickedValue) {
@@ -245,27 +258,28 @@ void MainWindow::highlightSameDigits(int row, int col) {
   }
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event) {
-    if (controller && controller->isGameStarted()) {
-        int row = controller->selectedRow();
-        int col = controller->selectedCol();
-
-        if (row >= 0 && col >= 0) {
-            int key = event->key();
-
-            // Обработка цифр 1-9
-            if (key >= Qt::Key_1 && key <= Qt::Key_9) {
-                int value = key - Qt::Key_0;
-                emit numberEntered(row, col, value);
-            }
-            // Обработка Backspace и Delete для очистки
-            else if (key == Qt::Key_Backspace || key == Qt::Key_Delete) {
-                emit numberEntered(row, col, 0);
-            }
-        }
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+  if (controller && controller->isGameStarted()) {
+    // Переключение режима пометок по клавише N
+    if (event->key() == Qt::Key_Shift) {
+      controller->toggleNoteMode();
+      return;
     }
 
-    QMainWindow::keyPressEvent(event);
+    int row = controller->selectedRow();
+    int col = controller->selectedCol();
+
+    if (row >= 0 && col >= 0) {
+      if (event->key() >= Qt::Key_1 && event->key() <= Qt::Key_9) {
+        int value = event->key() - Qt::Key_0;
+        emit numberEntered(row, col, value);
+      } else if (event->key() == Qt::Key_Backspace ||
+                 event->key() == Qt::Key_Delete) {
+        emit numberEntered(row, col, 0);
+      }
+    }
+  }
+  QMainWindow::keyPressEvent(event);
 }
 
 // Слот для обработки двойного клика
@@ -275,24 +289,24 @@ void MainWindow::handleCellDoubleClicked(int row, int col) {
 }
 
 void MainWindow::setController(SudokuController *ctrl) {
-    controller = ctrl;
-    // Принудительно обновляем доску при установке контроллера
-    if (controller && controller->getBoard()) {
-        for (int row = 0; row < 9; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                UpdateCell(row, col, controller->getBoard()->getCellValue(row, col));
-            }
-        }
+  controller = ctrl;
+  // Принудительно обновляем доску при установке контроллера
+  if (controller && controller->getBoard()) {
+    for (int row = 0; row < 9; ++row) {
+      for (int col = 0; col < 9; ++col) {
+        UpdateCell(row, col, controller->getBoard()->getCellValue(row, col));
+      }
     }
+  }
 }
 
 void MainWindow::refreshHighlight() {
-    if (controller && controller->isGameStarted()) {
-        int row = controller->selectedRow();
-        int col = controller->selectedCol();
+  if (controller && controller->isGameStarted()) {
+    int row = controller->selectedRow();
+    int col = controller->selectedCol();
 
-        if (row >= 0 && col >= 0) {
-            handleCellSelected(row, col);
-        }
+    if (row >= 0 && col >= 0) {
+      handleCellSelected(row, col);
     }
+  }
 }

@@ -9,8 +9,10 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
       generator_(&solver_), selectedRow_(-1), selectedCol_(-1),
       gameStarted_(false) {
   // соединение сигнала клика по ячейке со слотом обработки
-  connect(view_, &MainWindow::CellClicked, this, &SudokuController::handleCellInteraction);
-  connect(view_, &MainWindow::CellDoubleClicked, this, &SudokuController::processCellInput);
+  connect(view_, &MainWindow::CellClicked, this,
+          &SudokuController::handleCellInteraction);
+  connect(view_, &MainWindow::CellDoubleClicked, this,
+          &SudokuController::processCellInput);
 
   // Инициализация таймера
   timer_ = new QTimer(this);
@@ -37,6 +39,7 @@ void SudokuController::newGame(int difficulty) {
     for (int col = 0; col < 9; ++col) {
       view_->UpdateCell(row, col, board_->getCellValue(row, col));
       view_->getCell(row, col)->setOriginal(board_->isCellOriginal(row, col));
+      view_->getCell(row, col)->clearNotes();
     }
   }
 
@@ -77,6 +80,10 @@ void SudokuController::updateTimer() {
 
 // обработка введенного числа
 void SudokuController::onNumberEntered(int row, int col, int value) {
+  if (noteMode_) {
+    handleNote(row, col, value);
+    return;
+  }
   if (board_->isCellOriginal(row, col)) {
     QMessageBox::warning(view_, "Ошибка", "Нельзя изменять исходные цифры!");
     view_->UpdateCell(row, col, board_->getCellValue(row, col));
@@ -111,6 +118,7 @@ void SudokuController::onNumberEntered(int row, int col, int value) {
 
   checkSolved();
 } // проверка допустимости введенного числа
+
 bool SudokuController::checkInput(int row, int col, int value) {
   return board_->isValidMove(row, col, value);
 }
@@ -132,7 +140,8 @@ void SudokuController::onGameSelected(int difficulty) {
 }
 
 void SudokuController::handleCellInteraction(int row, int col) {
-  if (!gameStarted_) return;
+  if (!gameStarted_)
+    return;
 
   // Запоминаем выбранную ячейку
   selectedRow_ = row;
@@ -141,14 +150,30 @@ void SudokuController::handleCellInteraction(int row, int col) {
 
 // Обработчик ввода (вызывается при двойном клике)
 void SudokuController::processCellInput(int row, int col) {
-  if (!gameStarted_) return;
+  if (!gameStarted_)
+    return;
 
   bool ok;
-  int value = QInputDialog::getInt(view_, tr("Введите число"),
-                                 tr("Число (1-9, 0 для очистки:"),
-                                 0, 0, 9, 1, &ok);
+  int value =
+      QInputDialog::getInt(view_, tr("Введите число"),
+                           tr("Число (1-9, 0 для очистки:"), 0, 0, 9, 1, &ok);
 
   if (ok) {
     onNumberEntered(row, col, value);
+  }
+}
+
+void SudokuController::handleNote(int row, int col, int value) {
+  if (!gameStarted_ || board_->isCellOriginal(row, col) ||
+      board_->getCellValue(row, col) != 0) {
+    return;
+  }
+
+  bool currentState = board_->hasNote(row, col, value);
+  board_->setNote(row, col, value, !currentState);
+
+  SudokuCell *cell = view_->getCell(row, col);
+  if (cell) {
+    cell->setNote(value, !currentState);
   }
 }

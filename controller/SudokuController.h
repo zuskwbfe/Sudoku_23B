@@ -27,9 +27,13 @@ public:
   int selectedRow() const { return selectedRow_; }
   int selectedCol() const { return selectedCol_; }
   bool isGameStarted() const { return gameStarted_; }
-  SudokuBoard* getBoard() const { return board_; }
+  SudokuBoard *getBoard() const { return board_; }
 
-private slots:
+  void toggleNoteMode() { noteMode_ = !noteMode_; }
+  bool isNoteMode() const { return noteMode_; }
+  void handleNote(int row, int col, int value);
+
+  private slots:
   // обработчик клика по клетке
   void handleCellInteraction(int row, int col);
   // обработчик ввода числа
@@ -59,4 +63,6 @@ private:
   int errorCount_;     // счетчик ошибок
 
   void processCellInput(int row, int col);
+
+  bool noteMode_ = false; // Режим ввода пометок
 };

@@ -1,14 +1,15 @@
 #include "SudokuCell.h"
 #include <QColor>
-#include <QPainter>
-#include <QPaintEvent>
-#include <QMouseEvent>
 #include <QDebug>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QPainter>
 
 SudokuCell::SudokuCell(int r, int c, QWidget *parent)
     : QPushButton(parent), row(r), col(c) {
   setFixedSize(40, 40);
-  setStyleSheet("font-size: 20px; border: none; margin: 0; padding: 0;"); // Базовый стиль
+  setStyleSheet(
+      "font-size: 20px; border: none; margin: 0; padding: 0;"); // Базовый стиль
   connect(this, &QPushButton::clicked,
           [this]() { emit cellClicked(row, col); });
 }
@@ -30,7 +31,8 @@ void SudokuCell::setOriginal(bool isOriginal) {
 void SudokuCell::updateTextColor() {
   QPalette p = palette();
   if (currentValue_ > 0) {
-    p.setColor(QPalette::ButtonText, isOriginal_ ? Qt::black : QColor(0, 0, 255));
+    p.setColor(QPalette::ButtonText,
+               isOriginal_ ? Qt::black : QColor(0, 0, 255));
   } else {
     p.setColor(QPalette::ButtonText, Qt::black);
   }
@@ -46,24 +48,25 @@ void SudokuCell::setHighlightState(HighlightState state) {
 }
 
 // Переопределяем отрисовку для поддержки подсветки
-void SudokuCell::paintEvent(QPaintEvent* event) {
+void SudokuCell::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event);
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
 
   // Рисуем фон в зависимости от состояния подсветки
   switch (highlightState) {
-    case Selected:
-      painter.fillRect(rect(), QColor(100, 149, 237)); // Оранжевый
-      break;
-    case Related:
-      painter.fillRect(rect(), QColor(230, 240, 255)); // Голубой
-      break;
-    case SameDigit:
-      painter.fillRect(rect(), QColor(100, 149, 237)); // Желтый для одинаковых цифр
-      break;
-    default:
-      painter.fillRect(rect(), Qt::white);
+  case Selected:
+    painter.fillRect(rect(), QColor(100, 149, 237)); // Оранжевый
+    break;
+  case Related:
+    painter.fillRect(rect(), QColor(230, 240, 255)); // Голубой
+    break;
+  case SameDigit:
+    painter.fillRect(rect(),
+                     QColor(100, 149, 237)); // Желтый для одинаковых цифр
+    break;
+  default:
+    painter.fillRect(rect(), Qt::white);
   }
 
   // Рисуем текст
@@ -71,6 +74,21 @@ void SudokuCell::paintEvent(QPaintEvent* event) {
     painter.setPen(palette().color(QPalette::ButtonText));
     painter.setFont(QFont("Arial", 16));
     painter.drawText(rect(), Qt::AlignCenter, text());
+  } else {
+    painter.setFont(QFont("Arial", 8));
+    int cellWidth = width() / 3;
+    int cellHeight = height() / 3;
+
+    for (int noteIndex = 0; noteIndex < 9; ++noteIndex) {
+      if (notes_[noteIndex]) {
+        int noteRow = noteIndex / 3;
+        int noteCol = noteIndex % 3;
+        QRect noteRect(noteCol * cellWidth, noteRow * cellHeight, cellWidth,
+                       cellHeight);
+        painter.drawText(noteRect, Qt::AlignCenter,
+                         QString::number(noteIndex + 1));
+      }
+    }
   }
 
   // Рисуем границы
@@ -103,11 +121,27 @@ void SudokuCell::paintEvent(QPaintEvent* event) {
   }
 }
 
-void SudokuCell::mouseDoubleClickEvent(QMouseEvent* event) {
+void SudokuCell::mouseDoubleClickEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     emit cellDoubleClicked(row, col); // Испускаем сигнал двойного клика
     event->accept(); // Помечаем событие как обработанное
   } else {
     QPushButton::mouseDoubleClickEvent(event); // Для других кнопок мыши
   }
+}
+
+void SudokuCell::setNote(int value, bool on) {
+  if (value >= 1 && value <= 9) {
+    notes_[value - 1] = on;
+    update();
+  }
+}
+
+bool SudokuCell::hasNote(int value) const {
+  return (value >= 1 && value <= 9) ? notes_[value - 1] : false;
+}
+
+void SudokuCell::clearNotes() {
+  notes_.fill(false);
+  update();
 }

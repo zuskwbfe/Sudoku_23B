@@ -66,6 +66,7 @@ void SudokuBoard::clear() {
     std::fill(row.begin(), row.end(), 0);
   }
   hasSolution_ = false;
+  clearAllNotes();
 }
 
 void SudokuBoard::copyFrom(const SudokuBoard &source) {
@@ -106,12 +107,7 @@ bool SudokuBoard::isValidMove(int row, int col, int value) const {
     return true; // Разрешаем очистку ячейки
   }
 
-  // Если есть сохранённое решение, проверяем соответствие ему
-  if (hasSolution_) {
-    return value == solution_[row][col];
-  }
-
-  // Если решения нет, используем стандартные проверки
+  // Стандартные проверки всегда должны выполняться
   // Проверка строки
   for (int c = 0; c < 9; ++c) {
     if (board_[row][c] == value && c != col) {
@@ -137,5 +133,37 @@ bool SudokuBoard::isValidMove(int row, int col, int value) const {
     }
   }
 
+  // Дополнительная проверка решения
+  if (hasSolution_) {
+    return value == solution_[row][col];
+  }
+
   return true;
+}
+
+void SudokuBoard::setNote(int row, int col, int value, bool on) {
+  if (value >= 1 && value <= 9) {
+    notes_[row][col][value - 1] = on;
+  }
+}
+
+bool SudokuBoard::hasNote(int row, int col, int value) const {
+  if (value >= 1 && value <= 9) {
+    return notes_[row][col][value - 1];
+  }
+  return false;
+}
+
+void SudokuBoard::clearNotes(int row, int col) {
+  for (int i = 0; i < 9; ++i) {
+    notes_[row][col][i] = false;
+  }
+}
+
+void SudokuBoard::clearAllNotes() {
+  for (auto &row : notes_) {
+    for (auto &cell : row) {
+      cell.fill(false);
+    }
+  }
 }

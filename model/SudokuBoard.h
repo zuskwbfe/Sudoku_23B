@@ -24,6 +24,11 @@ public:
   void copyFrom(const SudokuBoard &source);
   bool equals(const SudokuBoard &other) const;
 
+  void setNote(int row, int col, int value, bool on);
+  bool hasNote(int row, int col, int value) const;
+  void clearNotes(int row, int col);
+  void clearAllNotes();
+
   // Iterator (паттерн Итератор)
   class Iterator {
   public:
@@ -51,5 +56,7 @@ private:
   std::array<std::array<int, 9>, 9> board_;
   std::array<std::array<bool, 9>, 9> originalCells_ = {}; // Новое поле
   std::array<std::array<int, 9>, 9> solution_;
+  std::array<std::array<std::array<bool, 9>, 9>, 9>
+      notes_; // Пометки для каждой ячейки
   bool hasSolution_ = false;
 };
