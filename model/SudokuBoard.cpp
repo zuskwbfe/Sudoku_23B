@@ -12,43 +12,6 @@ void SudokuBoard::setCellValue(int row, int col, int value) {
   board_[row][col] = value;
 }
 
-// Проверка допустимости хода
-// bool SudokuBoard::isValidMove(int row, int col, int value) const {
-//   if (value < 0 || value > 9) {
-//     return false;
-//   }
-
-//   if (value == 0)
-//     return true; // Всегда разрешаем очистку клетки (установку 0)
-
-//   // Проверка строки на дублирование числа
-//   for (int c = 0; c < 9; ++c) {
-//     if (board_[row][c] == value && c != col) {
-//       return false;
-//     }
-//   }
-
-//   // Проверка столбца на дублирование числа
-//   for (int r = 0; r < 9; ++r) {
-//     if (board_[r][col] == value && r != row) {
-//       return false;
-//     }
-//   }
-
-//   // Проверка подквадрата 3x3 на дублирование числа
-//   int subgridRowStart = row - row % 3;
-//   int subgridColStart = col - col % 3;
-//   for (int r = subgridRowStart; r < subgridRowStart + 3; ++r) {
-//     for (int c = subgridColStart; c < subgridColStart + 3; ++c) {
-//       if (board_[r][c] == value && (r != row || c != col)) {
-//         return false;
-//       }
-//     }
-//   }
-
-//   return true; // Ход допустим
-// }
-
 // Проверка полностью решённого судоку
 bool SudokuBoard::isSolved() const {
   for (int row = 0; row < 9; ++row) {
