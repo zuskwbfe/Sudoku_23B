@@ -3,6 +3,7 @@
 #include "SudokuBoard.h"
 #include "SudokuGenerator.h"
 #include "SudokuSolver.h"
+#include "GameRecords.h"
 #include <QMessageBox> // для отображения всплывающих сообщений пользователю
 #include <QTimer>      // Добавляем для таймера
 
@@ -34,6 +35,7 @@ public:
   void handleNote(int row, int col, int value);
   void clearNotesInArea(int row, int col, int value);
   void clearNoteInCell(int row, int col, int value);
+  GameRecords& getGameRecords() { return records; }
 
 private slots:
   // обработчик клика по клетке
@@ -70,4 +72,7 @@ private:
   void processCellInput(int row, int col);
 
   bool noteMode_ = false; // Режим ввода пометок
+  int lastHighlightedDigit_ = 0;
+  GameRecords records;
+  Difficulty currentDifficulty_; // Для сохранения сложности
 };

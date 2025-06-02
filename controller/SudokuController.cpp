@@ -1,5 +1,6 @@
 #include "SudokuController.h"
 #include "SudokuGenerator.h"
+#include "GameRecords.h"
 #include <QInputDialog> // диалог ввода чисел
 #include <QMessageBox>  // всплывающие сообщения
 
@@ -17,6 +18,7 @@ SudokuController::SudokuController(SudokuBoard *board, MainWindow *view,
   // Инициализация таймера
   timer_ = new QTimer(this);
   connect(timer_, &QTimer::timeout, this, &SudokuController::updateTimer);
+  records.loadFromFile(); // Загружаем рекорды
 }
 
 // Форматирует время в формат "мм:сс" для отображения на UI.
@@ -30,6 +32,7 @@ QString SudokuController::formatTime(int seconds) const {
 
 // Начинает новую игру, генерирует доску судоку с заданной сложностью.
 void SudokuController::newGame(int difficulty) {
+  currentDifficulty_ = static_cast<Difficulty>(difficulty);
   board_->clear(); // Очищаем доску
   board_->clearOriginals(); // Сбрасываем метки исходных чисел
   generator_.generate(*board_, difficulty);
@@ -131,15 +134,30 @@ bool SudokuController::checkInput(int row, int col, int value) {
 
 // проверка полностью решенного судоку
 void SudokuController::checkSolved() {
-  if (board_->isSolved()) {
-    // Показываем сообщение о победе
-    QMessageBox::information(view_, tr("Поздравляем!"),
-                             tr("Вы решили судоку!"));
-    // Испускаем сигнал о завершении игры
-    gameStarted_ = false;
-    stopTimer();
-    emit gameCompleted();
-  }
+    if (board_->isSolved()) {
+        // Запрашиваем имя игрока
+        bool ok;
+        QString playerName = QInputDialog::getText(view_, tr("Поздравляем!"),
+            tr("Вы решили судоку!\nВведите ваше имя для таблицы рекордов:"), QLineEdit::Normal, "Player", &ok);
+
+        if (!ok || playerName.isEmpty()) {
+            playerName = "Player";
+        }
+
+        // Создаем запись
+        GameRecords::Record newRecord;
+        newRecord.playerName = playerName.toStdString();
+        newRecord.timeSeconds = secondsElapsed_;
+        newRecord.level = currentDifficulty_;
+
+        // Добавляем запись
+        records.addRecord(newRecord);
+
+        // Останавливаем игру
+        gameStarted_ = false;
+        stopTimer();
+        emit gameCompleted();
+    }
 }
 
 void SudokuController::onGameSelected(int difficulty) {
@@ -147,12 +165,42 @@ void SudokuController::onGameSelected(int difficulty) {
 }
 
 void SudokuController::handleCellInteraction(int row, int col) {
-  if (!gameStarted_)
-    return;
+    if (!gameStarted_) return;
 
-  // Запоминаем выбранную ячейку
-  selectedRow_ = row;
-  selectedCol_ = col;
+    selectedRow_ = row;
+    selectedCol_ = col;
+
+    // Снимаем предыдущую подсветку
+    if (lastHighlightedDigit_ != 0) {
+        for (int r = 0; r < 9; ++r) {
+            for (int c = 0; c < 9; ++c) {
+                if (board_->hasNote(r, c, lastHighlightedDigit_)) {
+                    SudokuCell* cell = view_->getCell(r, c);
+                    if (cell) {
+                        cell->setHighlightedNote(lastHighlightedDigit_, false);
+                    }
+                }
+            }
+        }
+    }
+
+    // Устанавливаем новую подсветку
+    int digit = board_->getCellValue(row, col);
+    lastHighlightedDigit_ = 0;
+
+    if (digit != 0) {
+        lastHighlightedDigit_ = digit;
+        for (int r = 0; r < 9; ++r) {
+            for (int c = 0; c < 9; ++c) {
+                if (board_->hasNote(r, c, digit)) {
+                    SudokuCell* cell = view_->getCell(r, c);
+                    if (cell) {
+                        cell->setHighlightedNote(digit, true);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Обработчик ввода (вызывается при двойном клике)

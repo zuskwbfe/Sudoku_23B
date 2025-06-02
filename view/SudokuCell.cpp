@@ -7,11 +7,12 @@
 
 SudokuCell::SudokuCell(int r, int c, QWidget *parent)
     : QPushButton(parent), row(r), col(c) {
-  setFixedSize(40, 40);
+  setFixedSize(60, 60);
   setStyleSheet(
       "font-size: 20px; border: none; margin: 0; padding: 0;"); // Базовый стиль
   connect(this, &QPushButton::clicked,
           [this]() { emit cellClicked(row, col); });
+  highlightedNotes_.fill(false);
 }
 
 // Установка отображаемого значения в ячейке
@@ -88,8 +89,15 @@ void SudokuCell::paintEvent(QPaintEvent *event) {
         int noteCol = noteIndex % 3;
         QRect noteRect(noteCol * cellWidth, noteRow * cellHeight, cellWidth,
                        cellHeight);
-        painter.drawText(noteRect, Qt::AlignCenter,
-                         QString::number(noteIndex + 1));
+        if (highlightedNotes_[noteIndex]) {
+                    painter.save();
+                    painter.setPen(Qt::blue);
+                    painter.setFont(QFont("Arial", 8, QFont::Bold));
+                    painter.drawText(noteRect, Qt::AlignCenter, QString::number(noteIndex + 1));
+                    painter.restore();
+                } else {
+                    painter.drawText(noteRect, Qt::AlignCenter, QString::number(noteIndex + 1));
+                }
       }
     }
   }
@@ -147,4 +155,16 @@ bool SudokuCell::hasNote(int value) const {
 void SudokuCell::clearNotes() {
   notes_.fill(false);
   update();
+}
+
+void SudokuCell::setHighlightedNote(int note, bool highlighted) {
+    if (note >= 1 && note <= 9) {
+        highlightedNotes_[note - 1] = highlighted;
+        update(); // Перерисовываем ячейку
+    }
+}
+
+void SudokuCell::clearHighlightedNotes() {
+    highlightedNotes_.fill(false);
+    update();
 }

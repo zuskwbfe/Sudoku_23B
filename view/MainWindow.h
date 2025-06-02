@@ -3,6 +3,7 @@
 #include "../model/SudokuBoard.h"
 #include "DifficultyDialog.h"
 #include "SudokuCell.h"
+#include "RecordsWindow.h"
 #include <QGridLayout>
 #include <QLabel> // Для отображения таймера и ошибок
 #include <QMainWindow>
@@ -36,6 +37,7 @@ public slots:
 
 private slots:
   void handleNewGame();
+  void showRecords(); // Новый слот для рекордов
 
 private:
   void createGameScreen();

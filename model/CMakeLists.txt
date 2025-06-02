@@ -3,6 +3,7 @@ add_library(model_lib STATIC
     SudokuBoard.cpp
     SudokuSolver.cpp
     SudokuGenerator.cpp
+    GameRecords.cpp
 )
 
 target_include_directories(model_lib PUBLIC

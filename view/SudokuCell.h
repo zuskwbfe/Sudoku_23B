@@ -25,6 +25,8 @@ public:
   // Методы для управления подсветкой
   void setHighlightState(HighlightState state);
   HighlightState getHighlightState() const { return highlightState; }
+  void setHighlightedNote(int note, bool highlighted);
+  void clearHighlightedNotes();
 
 signals:
   // Сигнал клика на ячейку
@@ -43,4 +45,5 @@ private:
   HighlightState highlightState = Default; // Состояние подсветки
   std::array<bool, 9> notes_;              // Пометки в ячейке
   void updateTextColor(); // Обновление цвета текста
+  std::array<bool, 9> highlightedNotes_ = {false}; // Состояние подсветки заметок
 };

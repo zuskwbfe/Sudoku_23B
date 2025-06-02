@@ -101,14 +101,17 @@ void MainWindow::createMainMenu() {
   QVBoxLayout *layout = new QVBoxLayout(menuScreen);
 
   QPushButton *newGameBtn = new QPushButton("Новая игра");
+  QPushButton *recordsBtn = new QPushButton("Рекорды");
   QPushButton *exitBtn = new QPushButton("Выход");
 
   layout->addStretch();
   layout->addWidget(newGameBtn);
+  layout->addWidget(recordsBtn);
   layout->addWidget(exitBtn);
   layout->addStretch();
 
   connect(newGameBtn, &QPushButton::clicked, this, &MainWindow::handleNewGame);
+  connect(recordsBtn, &QPushButton::clicked, this, &MainWindow::showRecords);
   connect(exitBtn, &QPushButton::clicked, qApp, &QApplication::quit);
 }
 
@@ -199,13 +202,13 @@ void MainWindow::handleCellSelected(int row, int col) {
 
 // Сбрасываем подсветку во всех ячейках
 void MainWindow::clearHighlights() {
-  for (int row = 0; row < 9; ++row) {
-    for (int col = 0; col < 9; ++col) {
-      cells[row][col]->setHighlightState(SudokuCell::Default);
+    for (int row = 0; row < 9; ++row) {
+        for (int col = 0; col < 9; ++col) {
+            cells[row][col]->setHighlightState(SudokuCell::Default);
+            cells[row][col]->clearHighlightedNotes(); // Сброс подсветки заметок
+        }
     }
-  }
 }
-
 // Подсвечиваем связанные ячейки
 void MainWindow::highlightRelatedCells(int row, int col) {
   // Подсветка строки и столбца
@@ -310,16 +313,11 @@ void MainWindow::refreshHighlight() {
 }
 
 void MainWindow::handleGameCompleted() {
-  // Показываем диалог выбора сложности
-  DifficultyDialog dialog(this);
-  dialog.setWindowTitle("Новая игра");
+  showMainMenu();
+}
 
-  if (dialog.exec() == QDialog::Accepted) {
-    // Запускаем новую игру с выбранной сложностью
-    int difficulty = dialog.getSelectedDifficulty();
-    controller->newGame(difficulty);
-  } else {
-    // Возвращаемся в главное меню
-    showMainMenu();
-  }
+void MainWindow::showRecords() {
+    RecordsWindow recordsWindow(this);
+    recordsWindow.showRecords(controller->getGameRecords());
+    recordsWindow.exec();
 }

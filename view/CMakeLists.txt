@@ -3,9 +3,11 @@ add_library(view_lib STATIC
     MainWindow.cpp
     DifficultyDialog.cpp
     SudokuCell.cpp
+    RecordsWindow.cpp
     MainWindow.h
     DifficultyDialog.h
     SudokuCell.h
+    RecordsWindow.h
 )
 
 target_include_directories(view_lib PUBLIC
